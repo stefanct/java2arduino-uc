@@ -1,0 +1,31 @@
+/** \file 
+Contains customized settings for arduino2j.
+
+This file can be used to customize the jumping table & function mapping and set properties.
+You need to set the compiler flag A2J_OPTS for this to take effect @see arduino2j.c. */
+#ifdef A2J_OPTS
+
+#include <inttypes.h>
+#include <avr/pgmspace.h>
+#include "arduino2j.h"
+
+#include <stdlib.h>
+#include "debug.h"
+#include "serial.h"
+
+#include "util/delay.h"
+#include "led.h"
+
+/* Function mapping */
+//FUNCMAP(tmplFunc, tmplFunc)
+
+/* Jump table */
+STARTJT
+//ADDJT(tmplFunc)
+ENDJT
+
+/* Properties */
+STARTPROPS
+//ADDPROP(tmplMACRO, tmplMACRO)
+ENDPROPS
+#endif // A2J_OPTS
