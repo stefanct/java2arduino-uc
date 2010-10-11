@@ -16,7 +16,15 @@ For documentation of the code of the "other" side please see j2arduino and espec
 #include "serial.h"
 #include "debug.h"
 #include "macros.h"
+#include <Drivers/USB/USB.h>
 #include "arduino2j.h"
+
+#define FIXED_CONTROL_ENDPOINT_SIZE 16
+#define BULK_IN_EPSIZE	64
+#define BULK_OUT_EPSIZE	64
+#define BULK_IN_EPNUM	1
+#define BULK_OUT_EPNUM	2
+
 
 static uint16_t readByte(void);
 static void writeByte(uint8_t data);
@@ -24,6 +32,7 @@ static void sendErrorFrame(uint8_t ret, uint8_t seq, uint16_t line);
 
 /** Initializes a2j and drivers it depends on*/
 void a2jInit(){
+	USB_Init();
 	serialInit(115200);
 }
 
@@ -164,6 +173,153 @@ uint8_t a2jMany(uint8_t *const lenp, uint8_t* *const datap){
 }
 //@}
 
+USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
+{
+ .Header                 = {.Size = sizeof(USB_Descriptor_Device_t), .Type = DTYPE_Device},
+
+ .USBSpecification       = VERSION_BCD(01.10),
+ .Class                  = 0xff,
+ .SubClass               = 0xaa,
+ .Protocol               = 0x00,
+
+ .Endpoint0Size          = FIXED_CONTROL_ENDPOINT_SIZE,
+
+ .VendorID               = 0x16c0,
+ .ProductID              = 0x0478,
+ .ReleaseNumber          = 0x0000,
+
+ .ManufacturerStrIndex   = 0x01,
+ .ProductStrIndex        = 0x02,
+ .SerialNumStrIndex      = USE_INTERNAL_SERIAL,
+
+ .NumberOfConfigurations = FIXED_NUM_CONFIGURATIONS
+};
+
+USB_Descriptor_String_t PROGMEM LanguageString =
+{
+ .Header                 = {.Size = USB_STRING_LEN(1), .Type = DTYPE_String},
+ .UnicodeString          = {LANGUAGE_ID_ENG}
+};
+
+USB_Descriptor_String_t PROGMEM ManufacturerString =
+{
+ .Header                 = {.Size = USB_STRING_LEN(3), .Type = DTYPE_String},
+ .UnicodeString          = L"ims.tuwien.ac.at"
+};
+
+USB_Descriptor_String_t PROGMEM ProductString =
+{
+ .Header                 = {.Size = USB_STRING_LEN(13), .Type = DTYPE_String},
+ .UnicodeString          = L"USB Board"
+};
+
+typedef struct {
+ USB_Descriptor_Configuration_Header_t Config;
+ USB_Descriptor_Interface_t            Interface;
+ USB_Descriptor_Endpoint_t             DataInEndpoint;
+ USB_Descriptor_Endpoint_t             DataOutEndpoint;
+} USB_Descriptor_Configuration_t;
+
+USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
+{
+ .Config =
+ {
+ .Header                 = {.Size = sizeof(USB_Descriptor_Configuration_Header_t), .Type = DTYPE_Configuration},
+
+ .TotalConfigurationSize = sizeof(USB_Descriptor_Configuration_t),
+ .TotalInterfaces        = 1,
+
+ .ConfigurationNumber    = 1,
+ .ConfigurationStrIndex  = NO_DESCRIPTOR,
+
+ .ConfigAttributes       = USB_CONFIG_ATTR_BUSPOWERED,
+
+ .MaxPowerConsumption    = USB_CONFIG_POWER_MA(100)
+ },
+
+ .Interface =
+ {
+ .Header                 = {.Size = sizeof(USB_Descriptor_Interface_t), .Type = DTYPE_Interface},
+
+ .InterfaceNumber        = 0,
+ .AlternateSetting       = 0,
+ .TotalEndpoints         = 3,
+
+ .Class                  = 0xff,
+ .SubClass               = 0xaa,
+ .Protocol               = 0x0,
+
+ .InterfaceStrIndex      = NO_DESCRIPTOR
+ },
+
+ .DataInEndpoint =
+ {
+ .Header                 = {.Size = sizeof(USB_Descriptor_Endpoint_t), .Type = DTYPE_Endpoint},
+
+ .EndpointAddress        = (ENDPOINT_DESCRIPTOR_DIR_IN | BULK_IN_EPNUM),
+ .Attributes             = (EP_TYPE_BULK | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA),
+ .EndpointSize           = BULK_IN_EPSIZE,
+ .PollingIntervalMS      = 0x00
+ },
+
+ .DataOutEndpoint =
+ {
+ .Header                 = {.Size = sizeof(USB_Descriptor_Endpoint_t), .Type = DTYPE_Endpoint},
+
+ .EndpointAddress        = (ENDPOINT_DESCRIPTOR_DIR_OUT | BULK_OUT_EPNUM),
+ .Attributes             = (EP_TYPE_BULK | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA),
+ .EndpointSize           = BULK_OUT_EPSIZE,
+ .PollingIntervalMS      = 0x00
+ }
+};
+
+//uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue, const uint8_t wIndex, void **const DescriptorAddress, uint8_t* MemoryAddressSpace){
+			uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,
+			                                    const uint8_t wIndex,
+			                                    const void** const DescriptorAddress
+			#if !defined(USE_FLASH_DESCRIPTORS) && !defined(USE_EEPROM_DESCRIPTORS) && !defined(USE_RAM_DESCRIPTORS)
+			                                    , uint8_t* MemoryAddressSpace
+			#endif
+			                                    )
+{
+    const uint8_t  DescriptorType   = (wValue >> 8);
+    const uint8_t  DescriptorNumber = (wValue & 0xFF);
+
+    void*    Address = NULL;
+    uint16_t Size    = NO_DESCRIPTOR;
+
+    switch (DescriptorType) {
+        case DTYPE_Device:
+            Address = (void*)&DeviceDescriptor;
+            Size    = sizeof(USB_Descriptor_Device_t);
+            break;
+        case DTYPE_Configuration:
+            Address = (void*)&ConfigurationDescriptor;
+            Size    = sizeof(USB_Descriptor_Configuration_t);
+            break;
+        case DTYPE_String:
+            switch (DescriptorNumber) {
+                case 0x00:
+                    Address = (void*)&LanguageString;
+                    Size    = pgm_read_byte(&LanguageString.Header.Size);
+                    break;
+                case 0x01:
+                    Address = (void*)&ManufacturerString;
+                    Size    = pgm_read_byte(&ManufacturerString.Header.Size);
+                    break;
+                case 0x02:
+                    Address = (void*)&ProductString;
+                    Size    = pgm_read_byte(&ProductString.Header.Size);
+                    break;
+            }
+            break;
+    }
+
+    *DescriptorAddress = Address;
+    return Size;
+}
+
+
 /** Calls the method determined by the command field read from the serial connection and sends its reply back.
 This function tries to read a packet according to the \ref prot "java2arduino protocol".
 If this is successful the payload is read into the static array \c buf and
@@ -174,6 +330,26 @@ Afterwards the method sends the return value of the callee, the length of the re
 the reply data itself back and returns.
 In the case of an error a special packet (see \ref j2aerrors, #sendErrorFrame) is sent if possible before returning.*/
 void a2jProcess(){
+	
+	    if (USB_DeviceState != DEVICE_STATE_Configured)
+        return;
+
+    //Endpoint_SelectEndpoint(BULK_IN_EPNUM);
+    //if (Endpoint_IsConfigured() && Endpoint_IsINReady() && Endpoint_IsReadWriteAllowed()) {
+		//do_something(state, data, &len);
+		//err = Endpoint_Write_Stream_LE((void *)data, len);
+		//FIXME handle err
+		//Endpoint_ClearIN();
+    //}
+//
+    //Endpoint_SelectEndpoint(BULK_OUT_EPNUM);
+    //if (Endpoint_IsConfigured() && Endpoint_IsOUTReceived() && Endpoint_IsReadWriteAllowed()) {
+		//err = Endpoint_Read_Stream_LE(data, len);
+		//FIXME handle err
+		//do_other_thing(data, len);
+		//Endpoint_ClearOUT();
+    //}
+    
 	static uint8_t buf[256];
 	uint8_t* payload = buf;
 
