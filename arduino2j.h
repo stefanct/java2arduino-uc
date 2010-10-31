@@ -4,6 +4,8 @@ Arduino2j header.*/
 #ifndef A2J_H
 #define A2J_H
 
+#include <stdint.h>
+
 /** Function pointer for data transfers upto #A2J_MAX_PAYLOAD bytes.
 On entry \a *datap points at a byte array of length \a *lenp,
 which is filled with the payload of the host computer.
@@ -21,21 +23,14 @@ Upto #A2J_MANY_PAYLOAD bytes following \a *datap may be written by the callee.
 After return the returned \a uint8_t, the offset, \a *isLastp and \a *lenp bytes of the array at \a *datap will be sent back to the host.*/
 typedef uint8_t (*const CMD_P_MANY)(uint8_t* isLastp, uint32_t *const offsetp, uint8_t *const lenp, uint8_t* *const datap);
 
-/** Timeout for serial reads (in centiseconds). */
-#define A2J_TIMEOUT 5
+void a2jProcess(void);
+void a2jInit(void);
 
 #define A2J_MAX_PAYLOAD 255 /**< Maximum number of bytes to be transmitted as payload in arduino2j packets.*/
 /** @addtogroup j2amany*/
 //@{
 #define A2J_MANY_HEADER 6 /**< Number of bytes of the a2jMany header. Consisting of the function offset, isLast and 4B offset.*/
 #define A2J_MANY_PAYLOAD (A2J_MAX_PAYLOAD - A2J_MANY_HEADER) /**< Maximum number of bytes to be transmitted as payload in a2jMany packets.*/
-//@}
-
-/** @addtogroup j2acrc java2arduino crc constants
-\see \ref crc */
-//@{
-#define A2J_CRC_CMD 11 /**< Constant to be added to the command offset byte. */
-#define A2J_CRC_LEN 97 /**< Constant to be added to the length byte. */
 //@}
 
 /** @addtogroup j2aerrors java2arduino error values */
@@ -45,13 +40,7 @@ typedef uint8_t (*const CMD_P_MANY)(uint8_t* isLastp, uint32_t *const offsetp, u
 #define A2J_RET_CHKSUM 0xF3 /**< Checksum error.*/
 //@}
 
-/** @addtogroup j2aframing java2arduino framing characters
-\see \ref framing */
-//@{
-#define A2J_SOF 0x12 /**< Start of frame.*/
-#define A2J_ESC 0x7D /**< Escape character.*/
-//@}
-
+#ifdef A2J
 /** @name arduino2j properties macros
 Arduino2j properties are a mapping between strings readable by the host computer.
 E.g. this can be used to propagate the presence or property of devices attached to the Arduino.
@@ -98,7 +87,7 @@ The expanded output of #FUNCMAP has to be in scope of #ADDJT and #ADDLJT respect
 	/** finalizes the jumptable/function mapping */
 	#define ENDJT }; const uint8_t a2j_jt_elems = sizeof(a2j_jt)/sizeof(jt_entry);
 
-	#ifdef DBG
+	#ifdef A2J_DBG
 		/** start of the jumptable including entries for various (default) arduino2j functions.*/
 		#define STARTJT \
 		FUNCMAP(a2jGetMapping, a2jGetMapping) \
@@ -108,24 +97,28 @@ The expanded output of #FUNCMAP has to be in scope of #ADDJT and #ADDLJT respect
 		FUNCMAP(a2jReset, a2jReset) \
 		FUNCMAP(a2jEcho, a2jEcho) \
 		const jt_entry PROGMEM a2j_jt[] = { \
-		{&a2jGetMapping, a2jGetMapping##_map} \
+		ADDJT(a2jGetMapping) \
 		ADDJT(a2jMany) \
 		ADDJT(a2jGetProperties) \
 		ADDJT(a2jDebug) \
+		ADDJT(a2jReset) \
 		ADDJT(a2jEcho)
 		
-	#else // DBG
+	#else // A2J_DBG
 
 		#define STARTJT \
 		FUNCMAP(a2jGetMapping, a2jGetMapping) \
+		FUNCMAP(a2jMany, a2jMany) \
 		FUNCMAP(a2jGetProperties, a2jGetProperties) \
 		FUNCMAP(a2jReset, a2jReset) \
 		FUNCMAP(a2jEcho, a2jEcho) \
 		const jt_entry PROGMEM a2j_jt[] = { \
-		{&a2jGetMapping, a2jGetMapping##_map} \
+		ADDJT(a2jGetMapping) \
+		ADDJT(a2jMany) \
 		ADDJT(a2jGetProperties) \
+		ADDJT(a2jReset) \
 		ADDJT(a2jEcho)
-	#endif // DBG
+	#endif // A2J_DBG
 //@}
 
 #else // A2J_FMAP
@@ -137,35 +130,22 @@ The expanded output of #FUNCMAP has to be in scope of #ADDJT and #ADDLJT respect
 	#define ADDLJT(funcName) , (CMD_P)&funcName
 	#define ENDJT }; const uint8_t a2j_jt_elems = sizeof(a2j_jt)/sizeof(jt_entry);
 
-	#ifdef DBG
+	#ifdef A2J_DBG
 		#define STARTJT const CMD_P PROGMEM a2j_jt[] = { \
-		&a2jGetProperties \
-		ADDJT(a2jDebug) \
-		ADDJT(a2jEcho)
-	#else // DBG
+			&a2jMany \
+			ADDJT(a2jGetProperties) \
+			ADDJT(a2jDebug) \
+			ADDJT(a2jEcho)
+	#else // A2J_DBG
 		#define STARTJT const CMD_P PROGMEM a2j_jt[] = { \
-		&a2jGetProperties \
-		ADDJT(a2jEcho)
-	#endif // DBG
-
+			&a2jMany \
+			ADDJT(a2jGetProperties) \
+			ADDJT(a2jEcho)
+	#endif // A2J_DBG
 #endif // A2J_FMAP
-
-void a2jProcess(void);
-void a2jInit(void);
-
-/**	@name default functions */
-//@{
-#ifdef A2J_FMAP
-uint8_t a2jGetMapping(uint8_t *const lenp, uint8_t* *const datap);
-#endif
-
-#ifdef DBG
-uint8_t a2jDebug(uint8_t *const lenp, uint8_t* *const datap);
-#endif
-
-uint8_t a2jMany(uint8_t *const lenp, uint8_t* *const datap);
-uint8_t a2jGetProperties(uint8_t *const lenp, uint8_t* *const datap);
-uint8_t a2jEcho(uint8_t *const,  uint8_t * *const);
-//@}
+#else // A2J
+	void a2jProcess(void){}
+	void a2jInit(void){}
+#endif // A2J
 
 #endif // A2J_H
