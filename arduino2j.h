@@ -94,14 +94,12 @@ The expanded output of #FUNCMAP has to be in scope of #ADDJT and #ADDLJT respect
 		FUNCMAP(a2jMany, a2jMany) \
 		FUNCMAP(a2jGetProperties, a2jGetProperties) \
 		FUNCMAP(a2jDebug, a2jDebug) \
-		FUNCMAP(a2jReset, a2jReset) \
 		FUNCMAP(a2jEcho, a2jEcho) \
 		const jt_entry PROGMEM a2j_jt[] = { \
-		ADDJT(a2jGetMapping) \
+		{&a2jGetMapping, a2jGetMapping_map} \
 		ADDJT(a2jMany) \
 		ADDJT(a2jGetProperties) \
 		ADDJT(a2jDebug) \
-		ADDJT(a2jReset) \
 		ADDJT(a2jEcho)
 		
 	#else // A2J_DBG
@@ -110,13 +108,11 @@ The expanded output of #FUNCMAP has to be in scope of #ADDJT and #ADDLJT respect
 		FUNCMAP(a2jGetMapping, a2jGetMapping) \
 		FUNCMAP(a2jMany, a2jMany) \
 		FUNCMAP(a2jGetProperties, a2jGetProperties) \
-		FUNCMAP(a2jReset, a2jReset) \
 		FUNCMAP(a2jEcho, a2jEcho) \
 		const jt_entry PROGMEM a2j_jt[] = { \
-		ADDJT(a2jGetMapping) \
+		{&a2jGetMapping, a2jGetMapping_map} \
 		ADDJT(a2jMany) \
 		ADDJT(a2jGetProperties) \
-		ADDJT(a2jReset) \
 		ADDJT(a2jEcho)
 	#endif // A2J_DBG
 //@}

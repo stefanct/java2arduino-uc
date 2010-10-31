@@ -1,3 +1,6 @@
+/** \file
+Arduino2java USB lowlevel abstraction header.*/
+
 #ifndef A2J_LL_USB
 	#define A2J_LL_USB
 

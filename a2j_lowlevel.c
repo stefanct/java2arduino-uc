@@ -1,3 +1,6 @@
+/** \file
+Arduino2java lowlevel abstraction selector.*/
+
 #ifdef A2J
 #include "a2j_lowlevel.h"
 
@@ -11,6 +14,6 @@
 		#include "a2j_lowlevel_usb.h"
 		A2J_LL_FUNC_DEFS(usb)
 	#else
-		#error "no a2j low level functions selected. please define A2J_SERIAL or A2J_USB"
+		#error "no a2j low level implementation selected. please define A2J_SERIAL or A2J_USB"
 	#endif
 #endif

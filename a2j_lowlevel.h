@@ -1,9 +1,12 @@
+/** \file
+Arduino2java gerneric lowlevel abstraction interface.*/
+
 #ifndef A2J_LL_H
 #define A2J_LL_H
 
 #include <stdint.h>
 
-/** Timeout for serial reads (in centiseconds). */
+/** Timeout for reads from the stream (in centiseconds). */
 #define A2J_TIMEOUT 5
 
 /** @addtogroup j2aframing java2arduino framing characters
