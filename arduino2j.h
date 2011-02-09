@@ -5,6 +5,7 @@ Arduino2j header.*/
 #define A2J_H
 
 #include <stdint.h>
+#include <stddef.h>
 
 /** Function pointer for data transfers upto #A2J_MAX_PAYLOAD bytes.
 On entry \a *datap points at a byte array of length \a *lenp,
@@ -23,8 +24,24 @@ Upto #A2J_MANY_PAYLOAD bytes following \a *datap may be written by the callee.
 After return the returned \a uint8_t, the offset, \a *isLastp and \a *lenp bytes of the array at \a *datap will be sent back to the host.*/
 typedef uint8_t (*const CMD_P_MANY)(uint8_t* isLastp, uint32_t *const offsetp, uint8_t *const lenp, uint8_t* *const datap);
 
+/**	@name default functions */
+//@{
 void a2jProcess(void);
 void a2jInit(void);
+void a2jTask(void);
+
+#ifdef A2J_FMAP
+uint8_t a2jGetMapping(uint8_t *const lenp, uint8_t* *const datap);
+#endif
+
+#ifdef A2J_DBG
+uint8_t a2jDebug(uint8_t *const lenp, uint8_t* *const datap);
+#endif
+
+uint8_t a2jMany(uint8_t *const lenp, uint8_t* *const datap);
+uint8_t a2jGetProperties(uint8_t *const lenp, uint8_t* *const datap);
+uint8_t a2jEcho(uint8_t *const,  uint8_t * *const);
+//@}
 
 #define A2J_MAX_PAYLOAD 255 /**< Maximum number of bytes to be transmitted as payload in arduino2j packets.*/
 /** @addtogroup j2amany*/
@@ -41,6 +58,7 @@ void a2jInit(void);
 //@}
 
 #ifdef A2J
+#ifdef A2J_PROPS
 /** @name arduino2j properties macros
 Arduino2j properties are a mapping between strings readable by the host computer.
 E.g. this can be used to propagate the presence or property of devices attached to the Arduino.
@@ -48,7 +66,7 @@ Arduino2j properties are saved to flash as sequence of c-string pairs (key and c
 To create the mapping one has to call the needed macros in succession.*/
 //@{
 /** Header for the properties. Needs to be called first.*/
-#define STARTPROPS const char PROGMEM a2j_props[] = {
+#define STARTPROPS const unsigned char PROGMEM a2j_props[] = {
 /** helper macro */
 #define EXPSTRFY(x) #x 
 /** Adds a mapping from \a key to \a value.
@@ -60,6 +78,13 @@ ADDPROP(MACRO, MACRO)
 #define ADDPROP(key,value) #key "\0" EXPSTRFY(value) "\0"
 /** Finalizes the properties. */
 #define ENDPROPS }; const uint8_t a2j_props_size = sizeof(a2j_props);
+#else
+#define STARTPROPS unsigned char* PROGMEM a2j_props = NULL;\
+const uint8_t a2j_props_size = 0;
+#define ADDPROP(key,value) 	
+#define ENDPROPS 
+#endif
+
 //@}
 
 #ifdef A2J_FMAP
@@ -140,8 +165,9 @@ The expanded output of #FUNCMAP has to be in scope of #ADDJT and #ADDLJT respect
 	#endif // A2J_DBG
 #endif // A2J_FMAP
 #else // A2J
-	void a2jProcess(void){}
-	void a2jInit(void){}
+	void a2jProcess(void){};
+	void a2jInit(void){};
+	void a2jTask(void){};
 #endif // A2J
 
 #endif // A2J_H

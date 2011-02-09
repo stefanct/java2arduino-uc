@@ -4,16 +4,14 @@ USB implementation of the Arduino2java lowlevel abstraction interface.*/
 #include <stdint.h>
 #include "util/delay.h"
 #include "a2j_lowlevel.h"
-#include "serial.h"
+#include <stdio.h>
 #include "a2j_lowlevel_usb.h"
 
 #ifdef A2J_USB
-
-
-uint8_t Endpoint_BytesInEndpointCntWait(uint8_t bytes, uint8_t centiSeconds);
+static uint8_t Endpoint_BytesInEndpointCntWait(uint8_t bytes, uint8_t centiSeconds);
 
 /** Returns 1, if there are \a bytes bytes available in the buffer before \a centiSeconds centiseconds have passed, 0 otherwise.*/
-uint8_t Endpoint_BytesInEndpointCntWait(uint8_t bytes, uint8_t centiSeconds){
+static uint8_t Endpoint_BytesInEndpointCntWait(uint8_t bytes, uint8_t centiSeconds){
 	if(centiSeconds == 0)
 		centiSeconds = 1;
 	uint16_t cnt = centiSeconds * 10; // 10 * 1ms == 10ms = centisecond
@@ -38,6 +36,7 @@ void EVENT_USB_Device_ConfigurationChanged(void){
 inline void a2jLLTask_usb(void){
 	USB_USBTask();
 }
+
 inline uint8_t a2jLLReady_usb(void){
     return USB_DeviceState == DEVICE_STATE_Configured;
 }
@@ -55,7 +54,6 @@ uint8_t a2jReadByte_usb(){
 
 	if (!(Endpoint_BytesInEndpoint()))
 		Endpoint_ClearOUT();
-	printf_P(PSTR("|%x|"), data);
 	return data;
 }
 
@@ -84,17 +82,20 @@ uint16_t a2jReadEscapedByte_usb(){
 void a2jWriteByte_usb(uint8_t data){
 	Endpoint_SelectEndpoint(A2J_USB_IN_EPNUM);
 	if(!(Endpoint_IsReadWriteAllowed())){
-		printf_P(PSTR("(Clr)"));
 		Endpoint_ClearIN();
-
+		//USB_USBTask();
 		//uint8_t err;
-		//if((err = Endpoint_WaitUntilReady()) != ENDPOINT_READYWAIT_NoError)
-			//return err;
-			printf_P(PSTR("(w=%x)"),Endpoint_WaitUntilReady());
+		//if((err = Endpoint_WaitUntilReady()) != ENDPOINT_READYWAIT_NoError){
+			//printf_P(PSTR("err=%x "), err);
+			//return;
+		//}
+			//
+		Endpoint_WaitUntilReady();
+		//printf_P(PSTR("(w=%x)"),Endpoint_WaitUntilReady());
 	}
 
 	Endpoint_Write_Byte(data);
-	printf_P(PSTR("|%x|"),data);
+	printf_P(PSTR("%x"),data);
 	return;
 	//return ENDPOINT_READYWAIT_NoError;
 }
@@ -109,9 +110,11 @@ void a2jWriteEscapedByte_usb(uint8_t data){
 
 void a2jFlush_usb(void){
 	Endpoint_SelectEndpoint(A2J_USB_IN_EPNUM);
-	printf_P(PSTR("(w=%x)"),Endpoint_WaitUntilReady());
+	//serialWriteBlock('\r');
+	//serialWriteBlock('\n');
+	Endpoint_WaitUntilReady();
 	Endpoint_ClearIN();
-	printf_P(PSTR("(w=%x)"),Endpoint_WaitUntilReady());
+	Endpoint_WaitUntilReady();
 	Endpoint_ClearIN();
 }
 

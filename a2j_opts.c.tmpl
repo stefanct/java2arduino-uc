@@ -5,16 +5,11 @@ This file can be used to customize the jumping table & function mapping and set 
 You need to set the compiler flag A2J_OPTS for this to take effect @see arduino2j.c. */
 #ifdef A2J_OPTS
 
-#include <inttypes.h>
+#include <stdint.h>
 #include <avr/pgmspace.h>
 #include "arduino2j.h"
 
-#include <stdlib.h>
-#include "debug.h"
-#include "serial.h"
-
-#include "util/delay.h"
-#include "led.h"
+//uint8_t tmplFunc(uint8_t *const lenp, uint8_t* *const datap){
 
 /* Function mapping */
 //FUNCMAP(tmplFunc, tmplFunc)

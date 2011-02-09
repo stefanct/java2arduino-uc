@@ -6,7 +6,7 @@ Debugging driver.*/
 #ifdef A2J_DBG
 #include <stdlib.h>
 #include <avr/pgmspace.h>
-#include "debug.h"
+#include "a2j_debug.h"
 
 /** @name Buffer related variables
 These are responsible to control access to the debug buffer */

@@ -7,7 +7,7 @@ Arduino2java gerneric lowlevel abstraction interface.*/
 #include <stdint.h>
 
 /** Timeout for reads from the stream (in centiseconds). */
-#define A2J_TIMEOUT 5
+#define A2J_TIMEOUT 50
 
 /** @addtogroup j2aframing java2arduino framing characters
 \see \ref framing */
@@ -39,7 +39,7 @@ uint16_t a2jReadEscapedByte(void);
 
 void a2jWriteByte(uint8_t data);
 
-/** Writes a byte to the serial line.
+/** Writes a byte to the underlying stream.
 If the given argument has to be escaped, it writes #A2J_ESC first and then \a data-1.
 @param data the byte to write
 @see arduino2framing*/
