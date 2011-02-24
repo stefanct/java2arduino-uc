@@ -1,8 +1,7 @@
-#ifdef A2J
-
 #include <stdint.h>
-
+#ifdef A2J
 #ifdef A2J_SERIAL
+
 #include "debug.h"
 #include "a2j_lowlevel.h"
 #include "a2j_lowlevel_serial.h"

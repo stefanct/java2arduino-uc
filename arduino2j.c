@@ -26,19 +26,6 @@ For documentation of the code of the "other" side please see j2arduino and espec
 static void a2jSendErrorFrame(uint8_t ret, uint8_t seq, uint16_t line);
 void printHex(uint8_t);
 
-/** Initializes a2j and drivers it depends on*/
-void a2jInit(){
-	a2jLLInit();
-}
-
-/** Background task that maintains the low level connections.
-Has to be called in a timely manner depending on theo underlying protocol:
-- USB: at least every 30ms when connected
-- Serial: not at all (equals nop)*/
-void a2jTask(){
-	a2jLLTask();
-}
-
 #ifdef A2J_OPTS
 
 	/** @name External jump table */
@@ -193,7 +180,7 @@ void a2jProcess(){
 	//a2jLLTask();
 
 	//printf_P(PSTR("|R-"));
-	if(!a2jLLReady())
+	if(!a2jReady())
 		return;
 
 	static uint8_t buf[256];
@@ -201,7 +188,7 @@ void a2jProcess(){
 
 	// SOF
 	//printf_P(PSTR("|S="));
-	if(!a2jLLAvailable() || a2jReadByte() != A2J_SOF)
+	if(!a2jAvailable() || a2jReadByte() != A2J_SOF)
 		return;
 
 	// sequence number

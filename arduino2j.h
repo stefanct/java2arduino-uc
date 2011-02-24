@@ -24,12 +24,19 @@ Upto #A2J_MANY_PAYLOAD bytes following \a *datap may be written by the callee.
 After return the returned \a uint8_t, the offset, \a *isLastp and \a *lenp bytes of the array at \a *datap will be sent back to the host.*/
 typedef uint8_t (*const CMD_P_MANY)(uint8_t* isLastp, uint32_t *const offsetp, uint8_t *const lenp, uint8_t* *const datap);
 
-/**	@name default functions */
-//@{
 void a2jProcess(void);
+
+/** Initializes a2j and drivers it depends on.*/
 void a2jInit(void);
+
+/** Background task that maintains the low level connections.
+Has to be called in a timely manner depending on the underlying protocol:
+- USB: at least every 30ms when connected
+- Serial: not at all (equals nop)*/
 void a2jTask(void);
 
+/**	@name default functions */
+//@{
 #ifdef A2J_FMAP
 uint8_t a2jGetMapping(uint8_t *const lenp, uint8_t* *const datap);
 #endif

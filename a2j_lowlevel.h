@@ -5,6 +5,15 @@ Arduino2java gerneric lowlevel abstraction interface.*/
 #define A2J_LL_H
 
 #include <stdint.h>
+#include "arduino2j.h"
+
+#ifdef A2J
+	#if defined(A2J_SERIAL) && defined(A2J_USB)
+		#error "multiple a2j low level functions enabled. please define either A2J_SERIAL _or_ A2J_USB"
+	#endif
+	#if !(defined(A2J_SERIAL) || defined(A2J_USB))
+		#error "no a2j low level implementation selected. please define A2J_SERIAL or A2J_USB"
+	#endif
 
 /** Timeout for reads from the stream (in centiseconds). */
 #define A2J_TIMEOUT 50
@@ -23,10 +32,8 @@ Arduino2java gerneric lowlevel abstraction interface.*/
 #define A2J_CRC_LEN 97 /**< Constant to be added to the length byte. */
 //@}
 
-void a2jLLInit(void);
-void a2jLLTask(void);
-uint8_t a2jLLReady(void);
-uint8_t a2jLLAvailable(void);
+uint8_t a2jReady(void);
+uint8_t a2jAvailable(void);
 uint8_t a2jReadByte(void);
 
 /** Reads one byte from the stream.
@@ -46,44 +53,5 @@ If the given argument has to be escaped, it writes #A2J_ESC first and then \a da
 void a2jWriteEscapedByte(uint8_t data);
 void a2jFlush(void);
 
-#define A2J_LL_FUNC_DECS(SUFFIX) \
-void a2jLLInit_##SUFFIX(void);\
-void a2jLLTask_##SUFFIX(void);\
-uint8_t a2jLLReady_##SUFFIX(void);\
-uint8_t a2jLLAvailable_##SUFFIX(void);\
-uint8_t a2jReadByte_##SUFFIX(void);\
-uint16_t a2jReadEscapedByte_##SUFFIX(void);\
-void a2jWriteByte_##SUFFIX(uint8_t data);\
-void a2jWriteEscapedByte_##SUFFIX(uint8_t data);\
-void a2jFlush_##SUFFIX(void);
-
-
-#define A2J_LL_FUNC_DEFS(SUFFIX) \
-inline void a2jLLInit(void){\
-	a2jLLInit_##SUFFIX();\
-}\
-inline void a2jLLTask(void){\
-	a2jLLTask_##SUFFIX();\
-}\
-inline uint8_t a2jLLReady(void){\
-	return a2jLLReady_##SUFFIX();\
-}\
-inline uint8_t a2jLLAvailable(void){\
-	return a2jLLAvailable_##SUFFIX();\
-}\
-inline uint8_t a2jReadByte(void){\
-	return a2jReadByte_##SUFFIX();\
-}\
-inline uint16_t a2jReadEscapedByte(void){\
-	return a2jReadEscapedByte_##SUFFIX();\
-}\
-inline void a2jWriteByte(uint8_t data){\
-	a2jWriteByte_##SUFFIX(data);\
-}\
-inline void a2jWriteEscapedByte(uint8_t data){\
-	a2jWriteEscapedByte_##SUFFIX(data);\
-}\
-inline void a2jFlush(void){\
-	a2jFlush_##SUFFIX();\
-}
-#endif
+#endif // A2J
+#endif // A2J_LL_H

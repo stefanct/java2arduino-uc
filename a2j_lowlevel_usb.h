@@ -7,10 +7,8 @@ Arduino2java USB lowlevel abstraction header.*/
 	#ifdef A2J
 		#ifdef A2J_USB
 
-		#include "a2j_lowlevel.h"
-		A2J_LL_FUNC_DECS(usb)
-
 		#include <LUFA/Drivers/USB/USB.h>
+		#include "a2j_lowlevel.h"
 
 		#define A2J_USB_C_EPSIZE    FIXED_CONTROL_ENDPOINT_SIZE
 		#define A2J_USB_IN_EPSIZE	64

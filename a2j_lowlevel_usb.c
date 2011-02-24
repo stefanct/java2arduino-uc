@@ -2,8 +2,7 @@
 USB implementation of the Arduino2java lowlevel abstraction interface.*/
 
 #include <stdint.h>
-#include "util/delay.h"
-#include "a2j_lowlevel.h"
+#include <util/delay.h>
 #include <stdio.h>
 #include "a2j_lowlevel_usb.h"
 
@@ -23,8 +22,7 @@ static uint8_t Endpoint_BytesInEndpointCntWait(uint8_t bytes, uint8_t centiSecon
 	return 0;
 }
 
-
-inline void a2jLLInit_usb(void){
+inline void a2jInit(void){
 	USB_Init();
 }
 
@@ -33,20 +31,20 @@ void EVENT_USB_Device_ConfigurationChanged(void){
 	Endpoint_ConfigureEndpoint(A2J_USB_OUT_EPNUM, EP_TYPE_BULK, ENDPOINT_DIR_OUT, A2J_USB_OUT_EPSIZE, ENDPOINT_BANK_SINGLE);
 }
 
-inline void a2jLLTask_usb(void){
+inline void a2jTask(void){
 	USB_USBTask();
 }
 
-inline uint8_t a2jLLReady_usb(void){
+inline uint8_t a2jReady(void){
     return USB_DeviceState == DEVICE_STATE_Configured;
 }
 
-uint8_t a2jLLAvailable_usb(void){
+uint8_t a2jAvailable(void){
 	Endpoint_SelectEndpoint(A2J_USB_OUT_EPNUM);
 	return Endpoint_BytesInEndpoint() != 0;
 }
 
-uint8_t a2jReadByte_usb(){
+uint8_t a2jReadByte(){
 	Endpoint_SelectEndpoint(A2J_USB_OUT_EPNUM);
 	uint8_t data = 0;
 	if (Endpoint_BytesInEndpoint())
@@ -57,14 +55,14 @@ uint8_t a2jReadByte_usb(){
 	return data;
 }
 
-uint16_t a2jReadEscapedByte_usb(){
+uint16_t a2jReadEscapedByte(){
 	Endpoint_SelectEndpoint(A2J_USB_OUT_EPNUM);
 	if(!Endpoint_BytesInEndpointCntWait(1, A2J_TIMEOUT)){
 		return -1;
 	}
 
 	// we need either one unescaped byte...
-	uint8_t data = a2jReadByte_usb();
+	uint8_t data = a2jReadByte();
 	//if(data == A2J_SOF)
 		// TODO: return "malformed frame", but checksum will save us, hopefully.
 		// problem: we don't know the sequence number here.
@@ -76,22 +74,18 @@ uint16_t a2jReadEscapedByte_usb(){
 	if(!Endpoint_BytesInEndpointCntWait(1, A2J_TIMEOUT)){
 		return -1;
 	}
-	return a2jReadByte_usb()+1;
+	return a2jReadByte()+1;
 }
 
-void a2jWriteByte_usb(uint8_t data){
+void a2jWriteByte(uint8_t data){
 	Endpoint_SelectEndpoint(A2J_USB_IN_EPNUM);
 	if(!(Endpoint_IsReadWriteAllowed())){
 		Endpoint_ClearIN();
-		//USB_USBTask();
-		//uint8_t err;
-		//if((err = Endpoint_WaitUntilReady()) != ENDPOINT_READYWAIT_NoError){
-			//printf_P(PSTR("err=%x "), err);
-			//return;
-		//}
-			//
-		Endpoint_WaitUntilReady();
-		//printf_P(PSTR("(w=%x)"),Endpoint_WaitUntilReady());
+		uint8_t err;
+		if((err = Endpoint_WaitUntilReady()) != ENDPOINT_READYWAIT_NoError){
+			fprintf_P(stderr, PSTR("err=%x "), err);
+			return;
+		}
 	}
 
 	Endpoint_Write_Byte(data);
@@ -100,18 +94,16 @@ void a2jWriteByte_usb(uint8_t data){
 	//return ENDPOINT_READYWAIT_NoError;
 }
 
-void a2jWriteEscapedByte_usb(uint8_t data){
+void a2jWriteEscapedByte(uint8_t data){
 	if(data == A2J_SOF || data == A2J_ESC){
-		a2jWriteByte_usb(A2J_ESC);
-		a2jWriteByte_usb(data-1);
+		a2jWriteByte(A2J_ESC);
+		a2jWriteByte(data-1);
 	}else
-		a2jWriteByte_usb(data);
+		a2jWriteByte(data);
 }
 
-void a2jFlush_usb(void){
+void a2jFlush(void){
 	Endpoint_SelectEndpoint(A2J_USB_IN_EPNUM);
-	//serialWriteBlock('\r');
-	//serialWriteBlock('\n');
 	Endpoint_WaitUntilReady();
 	Endpoint_ClearIN();
 	Endpoint_WaitUntilReady();
@@ -123,9 +115,6 @@ USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
 	.Header                 = {.Size = sizeof(USB_Descriptor_Device_t), .Type = DTYPE_Device},
 
 	.USBSpecification       = VERSION_BCD(01.10),
-	//.Class                  = 0x00,
-	//.SubClass               = 0x00,
-	//.Protocol               = 0x00,
 	.Class                  = 0xff,
 	.SubClass               = 0x13,
 	.Protocol               = 0x00,
@@ -139,7 +128,6 @@ USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
 	.ManufacturerStrIndex   = 0x01,
 	.ProductStrIndex        = 0x02,
 	.SerialNumStrIndex      = USE_INTERNAL_SERIAL,
-	//.SerialNumStrIndex      = NO_DESCRIPTOR,
 
 	.NumberOfConfigurations = FIXED_NUM_CONFIGURATIONS
 };
