@@ -91,7 +91,6 @@ void a2jWriteByte(uint8_t data){
 	Endpoint_Write_Byte(data);
 	printf_P(PSTR("%x"),data);
 	return;
-	//return ENDPOINT_READYWAIT_NoError;
 }
 
 void a2jWriteEscapedByte(uint8_t data){
@@ -121,9 +120,9 @@ USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
 
 	.Endpoint0Size          = A2J_USB_C_EPSIZE,
 
-	.VendorID               = 0x6666,
-	.ProductID              = 0xCAFE,
-	.ReleaseNumber          = 0xBABE,
+	.VendorID               = A2J_USB_VENDORID,
+	.ProductID              = A2J_USB_PRODUCTID,
+	.ReleaseNumber          = A2J_USB_RELEASENUMBER,
 
 	.ManufacturerStrIndex   = 0x01,
 	.ProductStrIndex        = 0x02,
@@ -141,13 +140,13 @@ USB_Descriptor_String_t PROGMEM LanguageString =
 USB_Descriptor_String_t PROGMEM ManufacturerString =
 {
 	.Header                 = {.Size = USB_STRING_LEN(16), .Type = DTYPE_String},
-	.UnicodeString          = L"ims.tuwien.ac.at"
+	.UnicodeString          = A2J_USB_MANUFACTURERSTRING
 };
 
 USB_Descriptor_String_t PROGMEM ProductString =
 {
 	.Header                 = {.Size = USB_STRING_LEN(9), .Type = DTYPE_String},
-	.UnicodeString          = L"USB Board"
+	.UnicodeString          = A2J_USB_PRODUCTSTRING
 };
 
 
@@ -174,9 +173,9 @@ USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 		.AlternateSetting       = 0,
 		.TotalEndpoints         = 2,
 
-		.Class                  = 0xff,
-		.SubClass               = 0xde,
-		.Protocol               = 0xad,
+		.Class                  = A2J_USB_INTERFACE_CLASS,
+		.SubClass               = A2J_USB_INTERFACE_SUBCLASS,
+		.Protocol               = A2J_USB_INTERFACE_PROTOCOL,
 
 		.InterfaceStrIndex      = NO_DESCRIPTOR
 	},
