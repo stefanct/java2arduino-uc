@@ -83,13 +83,11 @@ void a2jWriteByte(uint8_t data){
 		Endpoint_ClearIN();
 		uint8_t err;
 		if((err = Endpoint_WaitUntilReady()) != ENDPOINT_READYWAIT_NoError){
-			fprintf_P(stderr, PSTR("err=%x "), err);
 			return;
 		}
 	}
 
 	Endpoint_Write_Byte(data);
-	printf_P(PSTR("%x"),data);
 	return;
 }
 

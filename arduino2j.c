@@ -24,7 +24,6 @@ For documentation of the code of the "other" side please see j2arduino and espec
 #include <stdio.h>
 
 static void a2jSendErrorFrame(uint8_t ret, uint8_t seq, uint16_t line);
-void printHex(uint8_t);
 
 #ifdef A2J_OPTS
 
@@ -158,13 +157,6 @@ uint8_t a2jMany(uint8_t *const lenp, uint8_t* *const datap){
 }
 //@}
 
-void printHex(uint8_t tmp){
-	(void) tmp;
-		//printf_P(PSTR("%#2X"), tmp);
-	//a2jLLTask();
-		printf_P(PSTR("%02X"), tmp);
-}
-
 /** Calls the method determined by the command field read from the stream and sends its reply back.
 This function tries to read a packet according to the \ref prot "java2arduino protocol".
 If this is successful the payload is read into the static array \c buf and
@@ -175,11 +167,6 @@ Afterwards the method sends the return value of the callee, the length of the re
 the reply data itself back and returns.
 In the case of an error a special packet (see \ref j2aerrors, #a2jSendErrorFrame) is sent if possible before returning.*/
 void a2jProcess(){
-	//
-	//printf_P(PSTR("|T-"));
-	//a2jLLTask();
-
-	//printf_P(PSTR("|R-"));
 	if(!a2jReady())
 		return;
 
@@ -187,22 +174,18 @@ void a2jProcess(){
 	uint8_t* payload = buf;
 
 	// SOF
-	//printf_P(PSTR("|S="));
 	if(!a2jAvailable() || a2jReadByte() != A2J_SOF)
 		return;
 
 	// sequence number
-	printf_P(PSTR("\r\n| Q="));
 	uint16_t tmp = a2jReadEscapedByte();
 	if(tmp > 0xFF){
 		a2jSendErrorFrame(A2J_RET_TO, (uint8_t)tmp, __LINE__);
 		return;
 	}
 	uint8_t seq = (uint8_t)tmp;
-	printHex(seq);
 
 	 // function offset
-	printf_P(PSTR("| O="));
 	tmp = a2jReadEscapedByte();
 	if(tmp > 0xFF){
 		a2jSendErrorFrame(A2J_RET_TO, seq, __LINE__);
@@ -215,7 +198,6 @@ void a2jProcess(){
 		return;
 	}
 	uint8_t off = (uint8_t)tmp;
-	printHex(off);
 	
 	// length of the data array
 	tmp = a2jReadEscapedByte();
@@ -224,15 +206,11 @@ void a2jProcess(){
 		return;
 	}
 	uint8_t len = (uint8_t)tmp;
-	printf_P(PSTR("| L=%u"),len);
-	
 
 	uint8_t csum = (uint8_t)(seq ^ (off + A2J_CRC_CMD) ^ (len + A2J_CRC_LEN));
 	// read in payload // TODO 255B limit...?
-	printf_P(PSTR("| P="));
 	for(uint16_t i = 0; i < len; i++){
 		tmp = a2jReadEscapedByte();
-		printHex(tmp);
 		if(tmp > 0xFF){
 			a2jSendErrorFrame(A2J_RET_TO, seq, __LINE__);
 			return;
@@ -241,9 +219,7 @@ void a2jProcess(){
 		csum ^= (uint8_t)tmp;
 	}
 
-
 	// read and compare checksum
-	printf_P(PSTR("| C="));
 	tmp = a2jReadEscapedByte();
 	if(tmp > 0xFF){
 		a2jSendErrorFrame(A2J_RET_TO, seq, __LINE__);
@@ -251,10 +227,7 @@ void a2jProcess(){
 	}
 
 	uint8_t rsum = (uint8_t)tmp;
-	printHex(rsum);
-	printf_P(PSTR("\r\n"));
 	if(csum != rsum){
-		//wrStr_P(PSTR("rsum/csum"));wrHex(rsum);wrHex(csum);wr('\r\n');
 		a2jSendErrorFrame(A2J_RET_CHKSUM, seq, __LINE__);
 		return;
 	}
@@ -276,20 +249,12 @@ void a2jProcess(){
 	}
 	
 	// sending reply frame
-	//printf_P(PSTR("|Ws="));
 	a2jWriteByte(A2J_SOF);
 
-	printf_P(PSTR("|Wq="));
-	//printHex(seq);
 	a2jWriteEscapedByte(seq); // sequence number
-	printf_P(PSTR("|Wr="));
-	//printHex(ret);
 	a2jWriteEscapedByte(ret); // return value
-	printf_P(PSTR("|WL="));
-	//printHex(len);
 	a2jWriteEscapedByte(len); // len
 
-	printf_P(PSTR("|Wp="));
 	// start new calculation of frame checksum
 	csum = (uint8_t)(seq ^ (A2J_CRC_CMD + ret) ^ (A2J_CRC_LEN + len));
 
@@ -297,14 +262,10 @@ void a2jProcess(){
 	for(uint16_t i=0; i<len; i++){
 		uint8_t tmp8 = payload[i];
 		a2jWriteEscapedByte(tmp8);
-		//printHex(tmp8);
 		csum ^= tmp8;
 	}
-	printf_P(PSTR("|Wc="));
 	a2jWriteEscapedByte(csum);
-	//printHex(csum);
 	a2jFlush();
-	printf_P(PSTR("\r\n"));
 }
 
 /** Sends a frame indicating, that an error occurred.
