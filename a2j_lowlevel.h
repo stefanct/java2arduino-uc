@@ -32,8 +32,15 @@ Arduino2java gerneric lowlevel abstraction interface.*/
 #define A2J_CRC_LEN 97 /**< Constant to be added to the length byte. */
 //@}
 
+/** Indicates wheter the underlying stream layer is connected and ready.*/
 uint8_t a2jReady(void);
+
+/** Indicates wheter there is at least one byte available to read from the underlying stream.*/
 uint8_t a2jAvailable(void);
+
+/** Reads one byte from the stream.
+
+Returns the next raw byte from the stream.*/
 uint8_t a2jReadByte(void);
 
 /** Reads one byte from the stream.
@@ -44,6 +51,9 @@ If that byte indicates escaping, another byte is read and returned, after it has
 @see arduino2framing*/
 uint16_t a2jReadEscapedByte(void);
 
+/** Writes one byte to the stream.
+
+May fail silently, but will return eventually.*/
 void a2jWriteByte(uint8_t data);
 
 /** Writes a byte to the underlying stream.
@@ -51,6 +61,8 @@ If the given argument has to be escaped, it writes #A2J_ESC first and then \a da
 @param data the byte to write
 @see arduino2framing*/
 void a2jWriteEscapedByte(uint8_t data);
+
+/** Ensures any written byte before is really pushed to the underlying stream.*/
 void a2jFlush(void);
 
 #endif // A2J
