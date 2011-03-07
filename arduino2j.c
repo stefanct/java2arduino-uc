@@ -162,15 +162,11 @@ Afterwards the method sends the return value of the callee, the length of the re
 the reply data itself back and returns.
 In the case of an error a special packet (see \ref j2aerrors, #a2jSendErrorFrame) is sent if possible before returning.*/
 void a2jProcess(){
-	if(!a2jReady())
+	if(!a2jReady() || !a2jAvailable() || a2jReadByte() != A2J_SOF)
 		return;
 
 	static uint8_t buf[256];
 	uint8_t* payload = buf;
-
-	// SOF
-	if(!a2jAvailable() || a2jReadByte() != A2J_SOF)
-		return;
 
 	// sequence number
 	uint16_t tmp = a2jReadEscapedByte();

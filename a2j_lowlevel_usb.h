@@ -9,7 +9,6 @@ Arduino2java USB lowlevel abstraction header.*/
 
 			#include <LUFA/Drivers/USB/USB.h>
 			#include "a2j_lowlevel.h"
-			#include "a2j_opts.h"
 
 			#define A2J_USB_IN_EPNUM	1
 			#define A2J_USB_OUT_EPNUM	2
@@ -33,6 +32,7 @@ Arduino2java USB lowlevel abstraction header.*/
 				#define A2J_USB_PRODUCTSTRING	L"USB Board"
 
 			#else
+				#include "a2j_opts.h"
 				#if !defined (A2J_USB_IN_EPSIZE)
 					#error "Missing A2J_USB option! Need: " A2J_USB_IN_EPSIZE
 				#endif

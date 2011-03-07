@@ -15,8 +15,8 @@ Arduino2java gerneric lowlevel abstraction interface.*/
 		#error "no a2j low level implementation selected. please define A2J_SERIAL or A2J_USB"
 	#endif
 
-/** Timeout for reads from the stream (in centiseconds). */
-#define A2J_TIMEOUT 50
+/** Timeout for reads from the stream (in milliseconds). */
+#define A2J_TIMEOUT 10
 
 /** @addtogroup j2aframing java2arduino framing characters
 \see \ref framing */
@@ -40,13 +40,14 @@ uint8_t a2jAvailable(void);
 
 /** Reads one byte from the stream.
 
-Returns the next raw byte from the stream.*/
-uint8_t a2jReadByte(void);
+Tries to read a raw byte from the stream with a timeout of #A2J_TIMEOUT milliSeconds.
+*/
+uint16_t a2jReadByte(void);
 
 /** Reads one byte from the stream.
 
-Tries to read a byte from the stream with a timeout of #A2J_TIMEOUT centiseconds.
-If that byte indicates escaping, another byte is read and returned, after it has been incremented.
+Tries to read a raw byte from the stream with a timeout of #A2J_TIMEOUT milliSeconds.
+If that byte indicates escaping, another raw byte is read and returned, after it has been incremented.
 @return the next byte after de-escaping
 @see arduino2framing*/
 uint16_t a2jReadEscapedByte(void);

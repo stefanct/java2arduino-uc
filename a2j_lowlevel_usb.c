@@ -2,23 +2,10 @@
 USB implementation of the Arduino2java lowlevel abstraction interface.*/
 
 #include <util/delay.h>
+#include <avr/pgmspace.h>
 #include "a2j_lowlevel_usb.h"
 
 #ifdef A2J_USB
-static uint8_t Endpoint_BytesInEndpointCntWait(uint8_t bytes, uint8_t centiSeconds);
-
-/** Returns 1, if there are \a bytes bytes available in the buffer before \a centiSeconds centiseconds have passed, 0 otherwise.*/
-static uint8_t Endpoint_BytesInEndpointCntWait(uint8_t bytes, uint8_t centiSeconds){
-	if(centiSeconds == 0)
-		centiSeconds = 1;
-	uint16_t cnt = centiSeconds * 10; // 10 * 1ms == 10ms = centisecond
-	for(;cnt>0;cnt--){
-		if(Endpoint_BytesInEndpoint() >= bytes)
-			return 1;
-		_delay_ms(1);
-	}
-	return 0;
-}
 
 inline void a2jInit(void){
 	USB_Init();
@@ -42,37 +29,19 @@ uint8_t a2jAvailable(void){
 	return Endpoint_BytesInEndpoint() != 0;
 }
 
-uint8_t a2jReadByte(){
+uint16_t a2jReadByte(){
 	Endpoint_SelectEndpoint(A2J_USB_OUT_EPNUM);
-	uint8_t data = 0;
-	if (Endpoint_BytesInEndpoint())
-		data = Endpoint_Read_Byte();
-
-	if (!(Endpoint_BytesInEndpoint()))
-		Endpoint_ClearOUT();
-	return data;
-}
-
-uint16_t a2jReadEscapedByte(){
-	Endpoint_SelectEndpoint(A2J_USB_OUT_EPNUM);
-	if(!Endpoint_BytesInEndpointCntWait(1, A2J_TIMEOUT)){
-		return -1;
+	uint8_t cnt = A2J_TIMEOUT;
+	for(;cnt>0;cnt--){
+		if (Endpoint_BytesInEndpoint()){
+			uint8_t data = Endpoint_Read_Byte();
+			if (!(Endpoint_BytesInEndpoint()))
+				Endpoint_ClearOUT();
+			return data;
+		}
+		_delay_ms(1);
 	}
-
-	// we need either one unescaped byte...
-	uint8_t data = a2jReadByte();
-	//if(data == A2J_SOF)
-		// TODO: return "malformed frame", but checksum will save us, hopefully.
-		// problem: we don't know the sequence number here.
-	if(data != A2J_ESC){
-		return data;
-	}
-
-	// ... or an escape character + the escaped byte
-	if(!Endpoint_BytesInEndpointCntWait(1, A2J_TIMEOUT)){
-		return -1;
-	}
-	return a2jReadByte()+1;
+	return -1;
 }
 
 void a2jWriteByte(uint8_t data){
@@ -87,14 +56,6 @@ void a2jWriteByte(uint8_t data){
 
 	Endpoint_Write_Byte(data);
 	return;
-}
-
-void a2jWriteEscapedByte(uint8_t data){
-	if(data == A2J_SOF || data == A2J_ESC){
-		a2jWriteByte(A2J_ESC);
-		a2jWriteByte(data-1);
-	}else
-		a2jWriteByte(data);
 }
 
 void a2jFlush(void){
