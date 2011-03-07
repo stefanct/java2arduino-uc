@@ -1,9 +1,7 @@
 /** \file
 USB implementation of the Arduino2java lowlevel abstraction interface.*/
 
-#include <stdint.h>
 #include <util/delay.h>
-#include <stdio.h>
 #include "a2j_lowlevel_usb.h"
 
 #ifdef A2J_USB

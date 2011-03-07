@@ -12,16 +12,11 @@ For documentation of the code of the "other" side please see j2arduino and espec
 #ifdef A2J
 
 #include <stdint.h>
-#include <stdlib.h>
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
-#include <util/delay.h>
 #include "a2j_debug.h"
-#include "serial.h"
-#include "macros.h"
 #include "a2j_lowlevel.h"
 #include "arduino2j.h"
-#include <stdio.h>
 
 static void a2jSendErrorFrame(uint8_t ret, uint8_t seq, uint16_t line);
 

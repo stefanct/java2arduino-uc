@@ -47,7 +47,7 @@ uint8_t a2jReadByte(void);
 
 Tries to read a byte from the stream with a timeout of #A2J_TIMEOUT centiseconds.
 If that byte indicates escaping, another byte is read and returned, after it has been incremented.
-@return The next byte after de-escaping
+@return the next byte after de-escaping
 @see arduino2framing*/
 uint16_t a2jReadEscapedByte(void);
 
