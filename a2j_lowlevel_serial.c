@@ -1,7 +1,12 @@
+/** \file
+Serial implementation of the Arduino2java lowlevel abstraction interface.*/
+
+//ISO C forbids an empty source file
+#include <stdint.h>
+
 #ifdef A2J
 #ifdef A2J_SERIAL
 
-#include <stdint.h>
 #include <stdbool.h>
 #include <util/delay.h>
 #include "a2j_lowlevel.h"

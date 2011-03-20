@@ -1,3 +1,6 @@
+/** \file
+Arduino2java serial lowlevel abstraction header.*/
+
 #ifndef A2J_LL_SERIAL_H
 	#define A2J_LL_SERIAL_H
 

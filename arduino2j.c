@@ -7,7 +7,7 @@ It also includes some very basic arduino2j enabled convenience functions
 (e.g. for debugging, retrieving a mapping between arduino2j jumptable offsets and the corresponding function names etc.).
 
 Arduino2j provides an easy way to control Arduino applications from remote machines.
-For documentation of the code of the "other" side please see j2arduino and especially {@link j2arduino.Arduino Arduino}. */
+For documentation of the code of the "other" side please see j2arduino and especially {@link j2arduino.devices.Arduino Arduino}. */
 
 #ifdef A2J
 

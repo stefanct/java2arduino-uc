@@ -64,6 +64,15 @@ uint8_t a2jEcho(uint8_t *const,  uint8_t * *const);
 #define A2J_RET_CHKSUM 0xF3 /**< Checksum error.*/
 //@}
 
+/**\name Native endianess to byte array macros
+\anchor lilendianmacros
+These are used to write multibyte value in native endianess into a byte array. */
+//@{
+#define toArray16(source, destArray, offset) { uint16_t* ntoh_temp_var = (uint16_t*)(&destArray[offset]);ntoh_temp_var[0] = source; }
+#define toArray32(source, destArray, offset) { uint32_t* ntoh_temp_var = (uint32_t*)(&destArray[offset]);ntoh_temp_var[0] = source; }
+#define toArray64(source, destArray, offset) { uint64_t* ntoh_temp_var = (uint64_t*)(&destArray[offset]);ntoh_temp_var[0] = source; }
+// @}
+
 #ifdef A2J
 #ifdef A2J_PROPS
 /** @name arduino2j properties macros
@@ -85,7 +94,9 @@ ADDPROP(MACRO, MACRO)
 #define ADDPROP(key,value) #key "\0" EXPSTRFY(value) "\0"
 /** Finalizes the properties. */
 #define ENDPROPS }; const uint8_t a2j_props_size = sizeof(a2j_props);
-#else
+
+#else // A2J_PROPS
+
 #define STARTPROPS unsigned char* PROGMEM a2j_props = NULL;\
 const uint8_t a2j_props_size = 0;
 #define ADDPROP(key,value) 	
