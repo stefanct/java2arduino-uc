@@ -2,17 +2,16 @@
 Contains customized settings for arduino2j.
 
 This file can be used to customize a few constants used by arduino2j.
-You need to set the compiler flag A2J_OPTS for this to take effect @see arduino2j.c. */
-#ifdef A2J_OPTS
+You need to set the compiler flag A2J_LL_OPTS for this to take effect.
+@see arduino2j.c */
+#ifdef A2J_LL_OPTS
 
 // USB options
 #ifdef A2J_USB
-	#define A2J_USB_OPTS
-
 	//#define A2J_USB_IN_EPSIZE	64
 	//#define A2J_USB_OUT_EPSIZE	64
 	//#define A2J_USB_MANUFACTURERSTRING	L"template manufacturer"
 	//#define A2J_USB_PRODUCTSTRING	L"template product"
 
 #endif // A2J_USB
-#endif // A2J_OPTS
+#endif // A2J_LL_OPTS

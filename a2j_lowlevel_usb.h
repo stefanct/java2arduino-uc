@@ -22,8 +22,8 @@ Arduino2java USB lowlevel abstraction header.*/
 			#define A2J_USB_INTERFACE_SUBCLASS	0x12
 			#define A2J_USB_INTERFACE_PROTOCOL	0xef
 
-			#ifndef A2J_USB_OPTS
-				#warning "Using default settings for arduino2java USB. To use your own, define them and call gcc with -D A2J_USB_OPTS."
+			#ifndef A2J_LL_OPTS
+				#warning "Using default settings for arduino2java USB. To use your own, define them and call gcc with -D A2J_LL_OPTS."
 
 				#define A2J_USB_IN_EPSIZE	64
 				#define A2J_USB_OUT_EPSIZE	64
@@ -49,7 +49,7 @@ Arduino2java USB lowlevel abstraction header.*/
 					#error "Missing A2J_USB option! Need: " A2J_USB_PRODUCTSTRING
 				#endif
 
-			#endif // A2J_USB_OPTS
+			#endif // A2J_LL_OPTS
 
 
 			typedef struct {
