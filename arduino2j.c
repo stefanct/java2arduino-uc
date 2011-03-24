@@ -109,10 +109,18 @@ uint8_t a2jGetProperties(uint8_t *const lenp, uint8_t* *const datap){
 uint8_t a2jEcho(uint8_t *const lenp, uint8_t* *const datap){
 	(void)datap;
 	(void)lenp;
-	//return *lenp;
-	return 3;
+	return 0xBA;
 }
 
+/**@ingroup j2amany
+Echoes back the data sent over the stream. */
+uint8_t a2jEchoMany(uint8_t* isLastp, uint32_t *const offset, uint8_t *const lenp, uint8_t* *const datap){
+	(void)isLastp;
+	(void)offset;
+	(void)lenp;
+	(void)datap;
+	return 0xBE;
+}
 
 /**@ingroup j2amany
 Reads out the a2jMany-specific header from the start of \a *datap and 

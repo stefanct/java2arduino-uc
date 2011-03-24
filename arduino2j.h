@@ -48,6 +48,7 @@ uint8_t a2jDebug(uint8_t *const lenp, uint8_t* *const datap);
 uint8_t a2jMany(uint8_t *const lenp, uint8_t* *const datap);
 uint8_t a2jGetProperties(uint8_t *const lenp, uint8_t* *const datap);
 uint8_t a2jEcho(uint8_t *const,  uint8_t * *const);
+uint8_t a2jEchoMany(uint8_t* isLastp, uint32_t *const offset, uint8_t *const lenp, uint8_t* *const datap);
 //@}
 
 #define A2J_MAX_PAYLOAD 255 /**< Maximum number of bytes to be transmitted as payload in arduino2j packets.*/
@@ -138,12 +139,14 @@ The expanded output of #FUNCMAP has to be in scope of #ADDJT and #ADDLJT respect
 		FUNCMAP(a2jGetProperties, a2jGetProperties) \
 		FUNCMAP(a2jDebug, a2jDebug) \
 		FUNCMAP(a2jEcho, a2jEcho) \
+		FUNCMAP(a2jEchoMany, a2jEchoMany) \
 		const jt_entry PROGMEM a2j_jt[] = { \
 		{&a2jGetMapping, a2jGetMapping_map} \
 		ADDJT(a2jMany) \
 		ADDJT(a2jGetProperties) \
 		ADDJT(a2jDebug) \
-		ADDJT(a2jEcho)
+		ADDJT(a2jEcho)\
+		ADDLJT(a2jEchoMany)
 		
 	#else // A2J_DBG
 
@@ -152,11 +155,13 @@ The expanded output of #FUNCMAP has to be in scope of #ADDJT and #ADDLJT respect
 		FUNCMAP(a2jMany, a2jMany) \
 		FUNCMAP(a2jGetProperties, a2jGetProperties) \
 		FUNCMAP(a2jEcho, a2jEcho) \
+		FUNCMAP(a2jEchoMany, a2jEchoMany) \
 		const jt_entry PROGMEM a2j_jt[] = { \
 		{&a2jGetMapping, a2jGetMapping_map} \
 		ADDJT(a2jMany) \
 		ADDJT(a2jGetProperties) \
-		ADDJT(a2jEcho)
+		ADDJT(a2jEcho)\
+		ADDLJT(a2jEchoMany)
 	#endif // A2J_DBG
 //@}
 
@@ -174,12 +179,14 @@ The expanded output of #FUNCMAP has to be in scope of #ADDJT and #ADDLJT respect
 			&a2jMany \
 			ADDJT(a2jGetProperties) \
 			ADDJT(a2jDebug) \
-			ADDJT(a2jEcho)
+			ADDJT(a2jEcho) \
+			ADDLJT(a2jEchoMany)
 	#else // A2J_DBG
 		#define STARTJT const CMD_P PROGMEM a2j_jt[] = { \
 			&a2jMany \
 			ADDJT(a2jGetProperties) \
-			ADDJT(a2jEcho)
+			ADDJT(a2jEcho) \
+			ADDLJT(a2jEchoMany)
 	#endif // A2J_DBG
 #endif // A2J_FMAP
 #else // A2J
