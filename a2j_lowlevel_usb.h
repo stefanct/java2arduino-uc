@@ -28,28 +28,48 @@ Arduino2java USB lowlevel abstraction header.*/
 				#define A2J_USB_IN_EPSIZE	64
 				#define A2J_USB_OUT_EPSIZE	64
 
-				#define A2J_USB_MANUFACTURERSTRING	L"ims.tuwien.ac.at"
-				#define A2J_USB_PRODUCTSTRING	L"USB Board"
+				#define A2J_USB_MANUFACTURERSTRING	L"manufacturer"
+				#define A2J_USB_MANUFACTURERSTRING_LEN	12
+				#define A2J_USB_PRODUCTSTRING	L"product"
+				#define A2J_USB_PRODUCTSTRING_LEN	7
+				#define A2J_USB_SERIAL	L"123456"
+				#define A2J_USB_SERIAL_LEN 6
 
 			#else
 				#include "a2j_opts.h"
-				#if !defined (A2J_USB_IN_EPSIZE)
-					#error "Missing A2J_USB option! Need: " A2J_USB_IN_EPSIZE
-				#endif
-
-				#if !defined (A2J_USB_OUT_EPSIZE)
-					#error "Missing A2J_USB option! Need: " A2J_USB_OUT_EPSIZE
-				#endif
-
-				#if !defined (A2J_USB_MANUFACTURERSTRING)
-					#error "Missing A2J_USB option! Need: " A2J_USB_MANUFACTURERSTRING
-				#endif
-
-				#if !defined (A2J_USB_PRODUCTSTRING)
-					#error "Missing A2J_USB option! Need: " A2J_USB_PRODUCTSTRING
-				#endif
-
 			#endif // A2J_LL_OPTS
+
+			#if !defined (A2J_USB_IN_EPSIZE)
+				#error "Missing A2J_USB option! Need:  A2J_USB_IN_EPSIZE"
+			#endif
+
+			#if !defined (A2J_USB_OUT_EPSIZE)
+				#error "Missing A2J_USB option! Need:  A2J_USB_OUT_EPSIZE"
+			#endif
+
+			#if !defined (A2J_USB_MANUFACTURERSTRING)
+				#error "Missing A2J_USB option! Need:  A2J_USB_MANUFACTURERSTRING"
+			#endif
+
+			#if !defined (A2J_USB_MANUFACTURERSTRING_LEN)
+				#error "Missing A2J_USB option! Need:  A2J_USB_MANUFACTURERSTRING_LEN"
+			#endif
+
+			#if !defined (A2J_USB_PRODUCTSTRING)
+				#error "Missing A2J_USB option! Need:  A2J_USB_PRODUCTSTRING"
+			#endif
+
+			#if !defined (A2J_USB_PRODUCTSTRING_LEN)
+				#error "Missing A2J_USB option! Need:  A2J_USB_PRODUCTSTRING_LEN"
+			#endif
+
+			#if !defined (A2J_USB_SERIAL)
+				#warn "A2J_USB_SERIAL was not set. The internal serial will be used if available, else the host may generate one."
+			#else
+				#if !defined (A2J_USB_SERIAL_LEN)
+					#error "Missing A2J_USB option! Need:  A2J_USB_SERIAL_LEN if A2J_USB_SERIAL is defined"
+				#endif
+			#endif
 
 
 			typedef struct {
