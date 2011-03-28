@@ -60,10 +60,16 @@ uint8_t a2jWriteByte(uint8_t data){
 
 void a2jFlush(void){
 	Endpoint_SelectEndpoint(A2J_USB_IN_EPNUM);
-	Endpoint_WaitUntilReady();
+	bool IsEndpointFull = !Endpoint_IsReadWriteAllowed();
 	Endpoint_ClearIN();
-	Endpoint_WaitUntilReady();
-	Endpoint_ClearIN();
+
+	/* Ensure last packet is a short packet to terminate the transfer */
+	if (IsEndpointFull){
+		if(Endpoint_WaitUntilReady() != ENDPOINT_READYWAIT_NoError)
+			return;
+		Endpoint_ClearIN();
+		Endpoint_WaitUntilReady();
+	}
 }
 
 USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
