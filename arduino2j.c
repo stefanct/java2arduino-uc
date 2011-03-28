@@ -248,11 +248,14 @@ void a2jProcess(){
 	}
 	
 	// sending reply frame
-	a2jWriteByte(A2J_SOF);
-
-	a2jWriteEscapedByte(seq); // sequence number
-	a2jWriteEscapedByte(ret); // return value
-	a2jWriteEscapedByte(len); // len
+	if(a2jWriteByte(A2J_SOF))
+		return;
+	if(a2jWriteEscapedByte(seq)) // sequence number
+		return;
+	if(a2jWriteEscapedByte(ret)) // return value
+		return;
+	if(a2jWriteEscapedByte(len)) // length
+		return;
 
 	// start new calculation of frame checksum
 	csum = (uint8_t)(seq ^ (A2J_CRC_CMD + ret) ^ (A2J_CRC_LEN + len));
@@ -260,26 +263,35 @@ void a2jProcess(){
 	// sending data array
 	for(uint16_t i=0; i<len; i++){
 		uint8_t tmp8 = payload[i];
-		a2jWriteEscapedByte(tmp8);
+		if(a2jWriteEscapedByte(tmp8))
+			return;
 		csum ^= tmp8;
 	}
-	a2jWriteEscapedByte(csum);
+	if(a2jWriteEscapedByte(csum))
+		return;
 	a2jFlush();
 }
 
 /** Sends a frame indicating, that an error occurred.
 @see arduino2jerrors*/
 static void a2jSendErrorFrame(uint8_t ret, uint8_t seq, uint16_t line){
-	a2jWriteByte(A2J_SOF);
-	a2jWriteEscapedByte(seq); // sequence number
-	a2jWriteEscapedByte(ret); // return value
+	if(a2jWriteByte(A2J_SOF))
+		return;
+	if(a2jWriteEscapedByte(seq)) // sequence number
+		return;
+	if(a2jWriteEscapedByte(ret)) // return value
+		return;
 	uint8_t len = 2;
-	a2jWriteEscapedByte(len); // length
+	if(a2jWriteEscapedByte(len)) // length
+		return;
 	uint8_t lineu = (line>>8)%0xFF;
-	a2jWriteEscapedByte(lineu); // line
+	if(a2jWriteEscapedByte(lineu)) // line
+		return;
 	uint8_t linel = line%0xFF;
-	a2jWriteEscapedByte(linel); // line
-	a2jWriteEscapedByte((uint8_t)(seq ^ (A2J_CRC_CMD + ret) ^ (A2J_CRC_LEN+len) ^ lineu ^ linel)); // checksum
+	if(a2jWriteEscapedByte(linel)) // line
+		return;
+	if(a2jWriteEscapedByte((uint8_t)(seq ^ (A2J_CRC_CMD + ret) ^ (A2J_CRC_LEN+len) ^ lineu ^ linel))) // checksum
+		return;
 	a2jFlush();
 }
 #endif // A2J

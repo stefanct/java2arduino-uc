@@ -54,14 +54,16 @@ uint16_t a2jReadEscapedByte(void);
 
 /** Writes one byte to the stream.
 
-May fail silently, but will return eventually.*/
-void a2jWriteByte(uint8_t data);
+@param data the byte to write
+@return 0 on success */
+uint8_t a2jWriteByte(uint8_t data);
 
 /** Writes a byte to the underlying stream.
 If the given argument has to be escaped, it writes #A2J_ESC first and then \a data-1.
 @param data the byte to write
-@see arduino2framing*/
-void a2jWriteEscapedByte(uint8_t data);
+@return 0 on success
+@see arduino2framing */
+uint8_t a2jWriteEscapedByte(uint8_t data);
 
 /** Ensures any written byte before is really pushed to the underlying stream.*/
 void a2jFlush(void);

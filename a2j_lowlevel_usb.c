@@ -44,18 +44,18 @@ uint16_t a2jReadByte(){
 	return -1;
 }
 
-void a2jWriteByte(uint8_t data){
+uint8_t a2jWriteByte(uint8_t data){
 	Endpoint_SelectEndpoint(A2J_USB_IN_EPNUM);
 	if(!(Endpoint_IsReadWriteAllowed())){
 		Endpoint_ClearIN();
 		uint8_t err;
 		if((err = Endpoint_WaitUntilReady()) != ENDPOINT_READYWAIT_NoError){
-			return;
+			return err;
 		}
 	}
 
 	Endpoint_Write_Byte(data);
-	return;
+	return 0;
 }
 
 void a2jFlush(void){

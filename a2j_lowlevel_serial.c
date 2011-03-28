@@ -41,8 +41,8 @@ uint16_t a2jReadByte(){
 	return -1;
 }
 
-void a2jWriteByte(uint8_t data){
-	serialWriteBlock(data);
+uint8_t a2jWriteByte(uint8_t data){
+	return serialWriteBlock(data);
 }
 
 void a2jFlush(void){
