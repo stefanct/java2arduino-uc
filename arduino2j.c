@@ -14,7 +14,6 @@ For documentation of the code of the "other" side please see j2arduino and espec
 #include <stdint.h>
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
-#include "a2j_debug.h"
 #include "a2j_lowlevel.h"
 #include "arduino2j.h"
 

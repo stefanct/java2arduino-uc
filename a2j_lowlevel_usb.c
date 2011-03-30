@@ -48,9 +48,8 @@ uint8_t a2jWriteByte(uint8_t data){
 	Endpoint_SelectEndpoint(A2J_USB_IN_EPNUM);
 	if(!(Endpoint_IsReadWriteAllowed())){
 		Endpoint_ClearIN();
-		uint8_t err;
-		if((err = Endpoint_WaitUntilReady()) != ENDPOINT_READYWAIT_NoError){
-			return err;
+		if(Endpoint_WaitUntilReady() != ENDPOINT_READYWAIT_NoError){
+			return -1;
 		}
 	}
 
