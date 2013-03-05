@@ -12,8 +12,8 @@ inline void a2jInit(void){
 }
 
 void EVENT_USB_Device_ConfigurationChanged(void){
-	Endpoint_ConfigureEndpoint(A2J_USB_IN_EPNUM, EP_TYPE_BULK, ENDPOINT_DIR_IN, A2J_USB_IN_EPSIZE, ENDPOINT_BANK_SINGLE);
-	Endpoint_ConfigureEndpoint(A2J_USB_OUT_EPNUM, EP_TYPE_BULK, ENDPOINT_DIR_OUT, A2J_USB_OUT_EPSIZE, ENDPOINT_BANK_SINGLE);
+	Endpoint_ConfigureEndpoint(A2J_USB_IN_ADDR, EP_TYPE_BULK, A2J_USB_IN_EPSIZE, 1);
+	Endpoint_ConfigureEndpoint(A2J_USB_OUT_ADDR, EP_TYPE_BULK, A2J_USB_OUT_EPSIZE, 1);
 }
 
 inline void a2jTask(void){
@@ -25,16 +25,16 @@ inline uint8_t a2jReady(void){
 }
 
 uint8_t a2jAvailable(void){
-	Endpoint_SelectEndpoint(A2J_USB_OUT_EPNUM);
+	Endpoint_SelectEndpoint(A2J_USB_OUT_ADDR);
 	return Endpoint_BytesInEndpoint() != 0;
 }
 
 uint16_t a2jReadByte(){
-	Endpoint_SelectEndpoint(A2J_USB_OUT_EPNUM);
+	Endpoint_SelectEndpoint(A2J_USB_OUT_ADDR);
 	uint8_t cnt = A2J_TIMEOUT;
 	for(; cnt>0; cnt--){
 		if (Endpoint_BytesInEndpoint()){
-			uint8_t data = Endpoint_Read_Byte();
+			uint8_t data = Endpoint_Read_8();
 			if (!(Endpoint_BytesInEndpoint()))
 				Endpoint_ClearOUT();
 			return data;
@@ -45,7 +45,7 @@ uint16_t a2jReadByte(){
 }
 
 uint8_t a2jWriteByte(uint8_t data){
-	Endpoint_SelectEndpoint(A2J_USB_IN_EPNUM);
+	Endpoint_SelectEndpoint(A2J_USB_IN_ADDR);
 	if(!(Endpoint_IsReadWriteAllowed())){
 		Endpoint_ClearIN();
 		if(Endpoint_WaitUntilReady() != ENDPOINT_READYWAIT_NoError){
@@ -53,12 +53,12 @@ uint8_t a2jWriteByte(uint8_t data){
 		}
 	}
 
-	Endpoint_Write_Byte(data);
+	Endpoint_Write_8(data);
 	return 0;
 }
 
 void a2jFlush(void){
-	Endpoint_SelectEndpoint(A2J_USB_IN_EPNUM);
+	Endpoint_SelectEndpoint(A2J_USB_IN_ADDR);
 	bool IsEndpointFull = !Endpoint_IsReadWriteAllowed();
 	Endpoint_ClearIN();
 
@@ -135,7 +135,7 @@ USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 		.ConfigurationNumber	= 1,
 		.ConfigurationStrIndex	= NO_DESCRIPTOR,
 
-		.ConfigAttributes		= USB_CONFIG_ATTR_BUSPOWERED,
+		.ConfigAttributes		= USB_CONFIG_ATTR_RESERVED,
 
 		.MaxPowerConsumption	= USB_CONFIG_POWER_MA(100)
 	},
@@ -157,7 +157,7 @@ USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 	.DataInEndpoint = {
 		.Header					= {.Size = sizeof(USB_Descriptor_Endpoint_t), .Type = DTYPE_Endpoint},
 
-		.EndpointAddress		= (ENDPOINT_DESCRIPTOR_DIR_IN | A2J_USB_IN_EPNUM),
+		.EndpointAddress		= A2J_USB_IN_ADDR,
 		.Attributes				= (EP_TYPE_BULK | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA),
 		.EndpointSize			= A2J_USB_IN_EPSIZE,
 		.PollingIntervalMS		= 0x00
@@ -166,7 +166,7 @@ USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 	.DataOutEndpoint = {
 		.Header					= {.Size = sizeof(USB_Descriptor_Endpoint_t), .Type = DTYPE_Endpoint},
 
-		.EndpointAddress		= (ENDPOINT_DESCRIPTOR_DIR_OUT | A2J_USB_OUT_EPNUM),
+		.EndpointAddress		= A2J_USB_OUT_ADDR,
 		.Attributes				= (EP_TYPE_BULK | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA),
 		.EndpointSize			= A2J_USB_OUT_EPSIZE,
 		.PollingIntervalMS		= 0x00

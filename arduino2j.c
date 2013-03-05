@@ -99,7 +99,7 @@ uint8_t a2jDebug(uint8_t *const lenp, uint8_t* *const datap){
 The properties are stored in pairs as consecutive C-strings in flash.
 This method retrieves them and puts them sequentially in the memory starting at *datap. */
 uint8_t a2jGetProperties(uint8_t *const lenp, uint8_t* *const datap){
-    memcpy_P(*datap, a2j_props, a2j_props_size);
+	memcpy_P(*datap, a2j_props, a2j_props_size);
 	*lenp = a2j_props_size;
 	return 0;
 }

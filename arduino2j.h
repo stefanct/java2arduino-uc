@@ -6,6 +6,7 @@ Arduino2j header.*/
 
 #include <stdint.h>
 #include <stddef.h>
+#include <avr/pgmspace.h>
 
 /** Function pointer for data transfers upto #A2J_MAX_PAYLOAD bytes.
 On entry \a *datap points at a byte array of length \a *lenp,
@@ -67,7 +68,7 @@ uint8_t a2jEchoMany(uint8_t* isLastp, uint32_t *const offset, uint8_t *const len
 
 /**\name Native endianess to byte array macros
 \anchor lilendianmacros
-These are used to write multibyte value in native endianess into a byte array. */
+These are used to write a multibyte value of native endianess into a byte array. */
 //@{
 #define toArray16(source, destArray, offset) { uint16_t* ntoh_temp_var = (uint16_t*)(&destArray[offset]);ntoh_temp_var[0] = source; }
 #define toArray32(source, destArray, offset) { uint32_t* ntoh_temp_var = (uint32_t*)(&destArray[offset]);ntoh_temp_var[0] = source; }
@@ -84,17 +85,19 @@ To create the mapping one has to call the needed macros in succession.*/
 //@{
 /** Header for the properties. Needs to be called first.*/
 #define STARTPROPS const unsigned char PROGMEM a2j_props[] = {
-/** helper macro */
-#define EXPSTRFY(x) #x 
-/** Adds a mapping from \a key to \a value.
-The second parameter will be expanded once to enable the use of macros as parameters, e.g.:
+/** Adds a mapping from \a key to \a value. */
+#define ADDPROP(key,value)  #key "\0"  #value "\0"
+#define STRFY(x) #x
+/** Adds a mapping from \a key to the stringified version of \a value.
+ *
+ * The second parameter will be expanded once to enable the use of macros as parameters, e.g.:
 \code
 #define MACRO 13
-ADDPROP(MACRO, MACRO)
+ADDPROPEXP(MACRO, MACRO)
 \endcode will create the mapping "MACRO"->"13".*/
-#define ADDPROP(key,value) #key "\0" EXPSTRFY(value) "\0"
+#define ADDPROPEXP(key,value) #key "\0" STRFY(value) "\0"
 /** Finalizes the properties. */
-#define ENDPROPS }; const uint8_t a2j_props_size = sizeof(a2j_props);
+#define ENDPROPS }; const uint8_t a2j_props_size = sizeof(a2j_props) - 1; /* C puts an additional \0 at the end of a "string" */
 
 #else // A2J_PROPS
 

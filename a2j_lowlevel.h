@@ -1,5 +1,5 @@
 /** \file
-Arduino2java gerneric lowlevel abstraction interface.*/
+Arduino2java generic lowlevel abstraction interface.*/
 
 #ifndef A2J_LL_H
 #define A2J_LL_H
