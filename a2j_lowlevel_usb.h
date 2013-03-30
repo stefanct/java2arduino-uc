@@ -71,12 +71,23 @@ Arduino2java USB lowlevel abstraction header.*/
 				#endif
 			#endif
 
+			#if defined (A2J_USB_CUSTOM_IF)
+				#if !defined (A2J_USB_DESC_DECL) || !defined (A2J_USB_DESC_DEF) || !defined (A2J_USB_CONFIG) || !defined (A2J_USB_NUM_CUSTOM_IF)
+					#error "Missing macros for the custom USB interface(s)! Need: A2J_USB_DESC_DECL, A2J_USB_DESC_DEF, A2J_USB_CONFIG, A2J_USB_NUM_CUSTOM_IF"
+				#endif
+			#else
+				#define A2J_USB_DESC_DECL
+				#define A2J_USB_DESC_DEF
+				#define A2J_USB_CONFIG
+				#define A2J_USB_NUM_CUSTOM_IF 0
+			#endif
 
 			typedef struct {
 				USB_Descriptor_Configuration_Header_t Config;
-				USB_Descriptor_Interface_t            Interface;
-				USB_Descriptor_Endpoint_t             DataInEndpoint;
-				USB_Descriptor_Endpoint_t             DataOutEndpoint;
+				USB_Descriptor_Interface_t            A2J_Interface;
+				USB_Descriptor_Endpoint_t             A2J_DataInEndpoint;
+				USB_Descriptor_Endpoint_t             A2J_DataOutEndpoint;
+				A2J_USB_DESC_DECL
 			} USB_Descriptor_Configuration_t;
 
 		#endif // A2J_USB

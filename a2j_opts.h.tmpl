@@ -16,5 +16,35 @@ You need to set the compiler flag A2J_LL_OPTS for this to take effect.
 	//#define A2J_USB_PRODUCTSTRING_LEN	16
 	//#define A2J_USB_SERIAL	L"123456"
 	//#define A2J_USB_SERIAL_LEN 6
+
+	/* These add an interface with one interrupt endpoint.
+	 * It is endpoint #3 after the two endpoints used by A2J.
+	 * For details about all settings see the LUFA docs and USB specs */
+	//#define A2J_USB_CUSTOM_IF
+	//#define A2J_USB_DESC_DECL \
+				//USB_Descriptor_Interface_t Interface;\
+				//USB_Descriptor_Endpoint_t  DataOutEndpoint;
+	//#define A2J_USB_DESC_DEF \
+		//.Interface = { \
+			//.Header					= {.Size = sizeof(USB_Descriptor_Interface_t), .Type = DTYPE_Interface}, \
+			//.InterfaceNumber		= 1, \
+			//.AlternateSetting		= 0, \
+			//.TotalEndpoints			= 1, \
+			//.Class					= 0xff, \
+			//.SubClass				= 12, \
+			//.Protocol				= 34, \
+			//.InterfaceStrIndex		= NO_DESCRIPTOR \
+		//}, \
+		//.DataOutEndpoint = { \
+			//.Header					= {.Size = sizeof(USB_Descriptor_Endpoint_t), .Type = DTYPE_Endpoint}, \
+			//.EndpointAddress		= (LIBUSB_ENDPOINT_OUT | 3), \
+			//.Attributes				= (EP_TYPE_INTERRUPT | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA), \
+			//.EndpointSize			= 16, \
+			//.PollingIntervalMS		= 1 /* for scheduling */ \
+		//},
+	//#define A2J_USB_NUM_CUSTOM_IF 1
+	//#define A2J_USB_CONFIG \
+			//Endpoint_ConfigureEndpoint((LIBUSB_ENDPOINT_OUT | 3), EP_TYPE_INTERRUPT, 16, 1);
+
 #endif // A2J_USB
 #endif // A2J_LL_OPTS
