@@ -67,12 +67,12 @@ uint8_t a2jEchoMany(uint8_t* isLastp, uint32_t *const offset, uint8_t *const len
 //@}
 
 /**\name Native endianess to byte array macros
-\anchor lilendianmacros
-These are used to write a multibyte value of native endianess into a byte array. */
+\anchor lilendianmacros */
 //@{
-#define toArray16(source, destArray, offset) { uint16_t* ntoh_temp_var = (uint16_t*)(&destArray[offset]);ntoh_temp_var[0] = source; }
-#define toArray32(source, destArray, offset) { uint32_t* ntoh_temp_var = (uint32_t*)(&destArray[offset]);ntoh_temp_var[0] = source; }
-#define toArray64(source, destArray, offset) { uint64_t* ntoh_temp_var = (uint64_t*)(&destArray[offset]);ntoh_temp_var[0] = source; }
+/** Write a multibyte value of native endianess into a byte array. */
+#define toArray(type, source, destArray, offset) { type* ntoh_temp_var = (type*)(&(destArray)[offset]);ntoh_temp_var[0] = (source); }
+/** Read a multibyte value from a byte array. */
+#define fromArray(type, source, offset) *(type*)(&(source)[offset])
 // @}
 
 #ifdef A2J
