@@ -76,10 +76,10 @@ const USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
 {
 	.Header				 = {.Size = sizeof(USB_Descriptor_Device_t), .Type = DTYPE_Device},
 
-	.USBSpecification		= VERSION_BCD(01.10),
-	.Class					= 0xff,
-	.SubClass				= 0x13,
-	.Protocol				= 0x00,
+	.USBSpecification		= VERSION_BCD(02.00),
+	.Class					= 0, /* Interfaces specify this if 0 */
+	.SubClass				= 0,
+	.Protocol				= 0,
 
 	.Endpoint0Size			= A2J_USB_C_EPSIZE,
 
@@ -148,9 +148,9 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 		.AlternateSetting		= 0,
 		.TotalEndpoints			= 2,
 
-		.Class					= A2J_USB_INTERFACE_CLASS,
-		.SubClass				= A2J_USB_INTERFACE_SUBCLASS,
-		.Protocol				= A2J_USB_INTERFACE_PROTOCOL,
+		.Class					= A2J_USB_IF_CLASS,
+		.SubClass				= A2J_USB_IF_SUBCLASS,
+		.Protocol				= A2J_USB_IF_PROTOCOL,
 
 		.InterfaceStrIndex		= NO_DESCRIPTOR
 	},

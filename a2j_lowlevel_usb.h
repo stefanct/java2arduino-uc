@@ -8,19 +8,9 @@ Arduino2java USB lowlevel abstraction header.*/
 		#ifdef A2J_USB
 
 			#include <LUFA/Drivers/USB/USB.h>
+			#include "j2a_const.h"
 			#include "a2j_lowlevel.h"
 
-			#define A2J_USB_IN_ADDR		(ENDPOINT_DIR_IN | 1)
-			#define A2J_USB_OUT_ADDR	(ENDPOINT_DIR_OUT | 2)
-			#define A2J_USB_C_EPSIZE	FIXED_CONTROL_ENDPOINT_SIZE
-
-			#define A2J_USB_VENDORID	0x6666
-			#define A2J_USB_PRODUCTID	0xCAFE
-			#define A2J_USB_RELEASENUMBER	0xBABE
-
-			#define A2J_USB_INTERFACE_CLASS		0xff
-			#define A2J_USB_INTERFACE_SUBCLASS	0x12
-			#define A2J_USB_INTERFACE_PROTOCOL	0xef
 
 			#ifndef A2J_LL_OPTS
 				#warning "Using default settings for arduino2java USB. To use your own, define them and call gcc with -D A2J_LL_OPTS."

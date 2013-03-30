@@ -7,6 +7,7 @@ Arduino2j header.*/
 #include <stdint.h>
 #include <stddef.h>
 #include <avr/pgmspace.h>
+#include "j2a_const.h"
 
 /** Function pointer for data transfers upto #A2J_MAX_PAYLOAD bytes.
 On entry \a *datap points at a byte array of length \a *lenp,
@@ -50,20 +51,6 @@ uint8_t a2jMany(uint8_t *const lenp, uint8_t* *const datap);
 uint8_t a2jGetProperties(uint8_t *const lenp, uint8_t* *const datap);
 uint8_t a2jEcho(uint8_t *const,  uint8_t * *const);
 uint8_t a2jEchoMany(uint8_t* isLastp, uint32_t *const offset, uint8_t *const lenp, uint8_t* *const datap);
-//@}
-
-#define A2J_MAX_PAYLOAD 255 /**< Maximum number of bytes to be transmitted as payload in arduino2j packets.*/
-/** @addtogroup j2amany*/
-//@{
-#define A2J_MANY_HEADER 6 /**< Number of bytes of the a2jMany header. Consisting of the function offset, isLast and 4B offset.*/
-#define A2J_MANY_PAYLOAD (A2J_MAX_PAYLOAD - A2J_MANY_HEADER) /**< Maximum number of bytes to be transmitted as payload in a2jMany packets.*/
-//@}
-
-/** @addtogroup j2aerrors java2arduino error values */
-//@{
-#define A2J_RET_OOB 0xF0 /**< Out of bounds of the arduino2j jump table.*/
-#define A2J_RET_TO 0xF2 /**< Timeout while waiting for a byte.*/
-#define A2J_RET_CHKSUM 0xF3 /**< Checksum error.*/
 //@}
 
 /**\name Native endianess to byte array macros
