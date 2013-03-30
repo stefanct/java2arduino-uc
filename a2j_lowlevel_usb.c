@@ -71,7 +71,7 @@ void a2jFlush(void){
 	}
 }
 
-USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
+const USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
 {
 	.Header				 = {.Size = sizeof(USB_Descriptor_Device_t), .Type = DTYPE_Device},
 
@@ -97,26 +97,26 @@ USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
 	.NumberOfConfigurations = FIXED_NUM_CONFIGURATIONS
 };
 
-USB_Descriptor_String_t PROGMEM LanguageString =
+const USB_Descriptor_String_t PROGMEM LanguageString =
 {
 	.Header				= {.Size = USB_STRING_LEN(1), .Type = DTYPE_String},
 	.UnicodeString		= L"Љ"
 };
 
-USB_Descriptor_String_t PROGMEM ManufacturerString =
+const USB_Descriptor_String_t PROGMEM ManufacturerString =
 {
 	.Header				= {.Size = USB_STRING_LEN(A2J_USB_MANUFACTURERSTRING_LEN), .Type = DTYPE_String},
 	.UnicodeString		= A2J_USB_MANUFACTURERSTRING
 };
 
-USB_Descriptor_String_t PROGMEM ProductString =
+const USB_Descriptor_String_t PROGMEM ProductString =
 {
 	.Header				= {.Size = USB_STRING_LEN(A2J_USB_PRODUCTSTRING_LEN), .Type = DTYPE_String},
 	.UnicodeString		= A2J_USB_PRODUCTSTRING
 };
 
 #ifdef A2J_USB_SERIAL
-USB_Descriptor_String_t PROGMEM SerialString =
+const USB_Descriptor_String_t PROGMEM SerialString =
 {
 	.Header				= {.Size = USB_STRING_LEN(A2J_USB_SERIAL_LEN), .Type = DTYPE_String},
 	.UnicodeString		= A2J_USB_SERIAL
@@ -124,7 +124,7 @@ USB_Descriptor_String_t PROGMEM SerialString =
 #endif
 
 
-USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
+const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 {
 	.Config = {
 		.Header					= {.Size = sizeof(USB_Descriptor_Configuration_Header_t), .Type = DTYPE_Configuration},

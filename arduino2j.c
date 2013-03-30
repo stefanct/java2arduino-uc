@@ -29,7 +29,7 @@ static void a2jSendErrorFrame(uint8_t ret, uint8_t seq, uint16_t line);
 
 	/** @name External properties */
 	//@{
-	extern unsigned char* PROGMEM a2j_props[];
+	extern unsigned char* const PROGMEM a2j_props[];
 	extern const uint8_t a2j_props_size;
 	//@}
 
@@ -45,7 +45,7 @@ static void a2jSendErrorFrame(uint8_t ret, uint8_t seq, uint16_t line);
 	/** @name Default properties
 	@see ::a2jGetProperties */
 	//@{
-	static unsigned char PROGMEM *a2j_props = NULL;
+	static unsigned char const PROGMEM *a2j_props = NULL;
 	static const uint8_t a2j_props_size = 0;
 	//@}
 #endif // A2J_OPTS
@@ -283,10 +283,10 @@ static void a2jSendErrorFrame(uint8_t ret, uint8_t seq, uint16_t line){
 	uint8_t len = 2;
 	if(a2jWriteEscapedByte(len)) // length
 		return;
-	uint8_t lineu = (line>>8)%0xFF;
+	uint8_t lineu = (line >> 8) & 0xFF;
 	if(a2jWriteEscapedByte(lineu)) // line
 		return;
-	uint8_t linel = line%0xFF;
+	uint8_t linel = line & 0xFF;
 	if(a2jWriteEscapedByte(linel)) // line
 		return;
 	if(a2jWriteEscapedByte((uint8_t)(seq ^ (A2J_CRC_CMD + ret) ^ (A2J_CRC_LEN+len) ^ lineu ^ linel))) // checksum

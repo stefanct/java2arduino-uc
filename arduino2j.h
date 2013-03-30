@@ -84,7 +84,7 @@ Arduino2j properties are saved to flash as sequence of c-string pairs (key and c
 To create the mapping one has to call the needed macros in succession.*/
 //@{
 /** Header for the properties. Needs to be called first.*/
-#define STARTPROPS const unsigned char PROGMEM a2j_props[] = {
+#define STARTPROPS unsigned char const PROGMEM a2j_props[] = {
 /** Adds a mapping from \a key to \a value. */
 #define ADDPROP(key,value)  #key "\0"  #value "\0"
 #define STRFY(x) #x
@@ -101,10 +101,10 @@ ADDPROPEXP(MACRO, MACRO)
 
 #else // A2J_PROPS
 
-#define STARTPROPS unsigned char* PROGMEM a2j_props = NULL;\
+#define STARTPROPS const unsigned char* PROGMEM a2j_props = NULL;\
 const uint8_t a2j_props_size = 0;
-#define ADDPROP(key,value) 	
-#define ENDPROPS 
+#define ADDPROP(key,value)
+#define ENDPROPS
 #endif
 
 //@}
@@ -126,7 +126,7 @@ The expanded output of #FUNCMAP has to be in scope of #ADDJT and #ADDLJT respect
 #STARTJT, #ADDJT/#ADDLJT and #ENDJT have to be called in succession.*/
 //@{
 	/** Creates a string \a "alias" in flash accessible by variable \a FuncName_map */
-	#define FUNCMAP(funcName, alias) static char PROGMEM funcName##_map[] = #alias;
+	#define FUNCMAP(funcName, alias) static const char PROGMEM funcName##_map[] = #alias;
 	/** Appends an entry to the jumptable */
 	#define ADDJT(funcName) , {&funcName, funcName##_map}
 	/** Appends an entry to the jumptable, to be used for a2jMany functions. @see CMD_P_MANY */
