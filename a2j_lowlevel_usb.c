@@ -72,7 +72,7 @@ void a2jFlush(void){
 	}
 }
 
-const USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
+static const USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
 {
 	.Header				 = {.Size = sizeof(USB_Descriptor_Device_t), .Type = DTYPE_Device},
 
@@ -91,39 +91,59 @@ const USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
 	.ProductStrIndex		= 0x02,
 #ifdef A2J_USB_SERIAL
 	.SerialNumStrIndex		= 0x03,
+	#define A2J_USB_CUSTOM_STRING_OFF	4
 #else
 	.SerialNumStrIndex		= USE_INTERNAL_SERIAL,
+	#define A2J_USB_CUSTOM_STRING_OFF	3
 #endif
 
 	.NumberOfConfigurations = FIXED_NUM_CONFIGURATIONS
 };
 
-const USB_Descriptor_String_t PROGMEM LanguageString =
+static const USB_Descriptor_String_t PROGMEM LanguageString =
 {
 	.Header				= {.Size = USB_STRING_LEN(1), .Type = DTYPE_String},
 	.UnicodeString		= L"Љ"
 };
 
-const USB_Descriptor_String_t PROGMEM ManufacturerString =
+static const USB_Descriptor_String_t PROGMEM ManufacturerString =
 {
 	.Header				= {.Size = USB_STRING_LEN(A2J_USB_MANUFACTURERSTRING_LEN), .Type = DTYPE_String},
 	.UnicodeString		= A2J_USB_MANUFACTURERSTRING
 };
 
-const USB_Descriptor_String_t PROGMEM ProductString =
+static const USB_Descriptor_String_t PROGMEM ProductString =
 {
 	.Header				= {.Size = USB_STRING_LEN(A2J_USB_PRODUCTSTRING_LEN), .Type = DTYPE_String},
 	.UnicodeString		= A2J_USB_PRODUCTSTRING
 };
 
 #ifdef A2J_USB_SERIAL
-const USB_Descriptor_String_t PROGMEM SerialString =
+static const USB_Descriptor_String_t PROGMEM SerialString =
 {
 	.Header				= {.Size = USB_STRING_LEN(A2J_USB_SERIAL_LEN), .Type = DTYPE_String},
 	.UnicodeString		= A2J_USB_SERIAL
 };
 #endif
 
+#ifdef A2J_USB_CUSTOM_STRINGS
+#define A2J_USB_CUSTOM_STRINGS_START \
+const USB_Descriptor_String_t PROGMEM customStrings[] = \
+{
+
+#define A2J_USB_CUSTOM_STRINGS_END \
+};
+
+#define A2J_USB_CUSTOM_STRING(string, length) \
+{ \
+	.Header				= {.Size = USB_STRING_LEN(length), .Type = DTYPE_String}, \
+	.UnicodeString		= string \
+}
+
+A2J_USB_CUSTOM_STRINGS_START
+A2J_USB_CUSTOM_STRINGS
+A2J_USB_CUSTOM_STRINGS_END
+#endif
 
 const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 {
@@ -211,6 +231,14 @@ uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue, const uint8_t wIndex,
 				case 0x03:
 					Address = (PGM_VOID_P)&SerialString;
 					Size = pgm_read_byte(&SerialString.Header.Size);
+					break;
+#endif
+#ifdef A2J_USB_CUSTOM_STRINGS
+				default:
+					if (DescriptorNumber < A2J_USB_CUSTOM_STRING_OFF + A2J_USB_CUSTOM_STRINGS_CNT) {
+						Address = (PGM_VOID_P)&customStrings[DescriptorNumber - A2J_USB_CUSTOM_STRING_OFF];
+						Size = pgm_read_byte(&customStrings[DescriptorNumber - A2J_USB_CUSTOM_STRING_OFF].Header.Size);
+					}
 					break;
 #endif
 			}

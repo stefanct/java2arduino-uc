@@ -53,12 +53,8 @@ Arduino2java USB lowlevel abstraction header.*/
 				#error "Missing A2J_USB option! Need:  A2J_USB_PRODUCTSTRING_LEN"
 			#endif
 
-			#if !defined (A2J_USB_SERIAL)
-				#warn "A2J_USB_SERIAL was not set. The internal serial will be used if available, else the host may generate one."
-			#else
-				#if !defined (A2J_USB_SERIAL_LEN)
-					#error "Missing A2J_USB option! Need:  A2J_USB_SERIAL_LEN if A2J_USB_SERIAL is defined"
-				#endif
+			#if defined (A2J_USB_SERIAL) && !defined (A2J_USB_SERIAL_LEN)
+				#error "Missing A2J_USB option! Need:  A2J_USB_SERIAL_LEN if A2J_USB_SERIAL is defined"
 			#endif
 
 			#if defined (A2J_USB_CUSTOM_IF)
