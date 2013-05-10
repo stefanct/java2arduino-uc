@@ -27,11 +27,13 @@ static void a2jSendErrorFrame(uint8_t ret, uint8_t seq, uint16_t line);
 	extern const uint8_t a2j_jt_elems;
 	//@}
 
+#ifdef A2J_PROPS
 	/** @name External properties */
 	//@{
 	extern unsigned char* const PROGMEM a2j_props[];
 	extern const uint8_t a2j_props_size;
 	//@}
+#endif // A2J_PROPS
 
 #else // A2J_OPTS
 
@@ -41,13 +43,6 @@ static void a2jSendErrorFrame(uint8_t ret, uint8_t seq, uint16_t line);
 
 	STARTJT
 	ENDJT
-
-	/** @name Default properties
-	@see ::a2jGetProperties */
-	//@{
-	static unsigned char const PROGMEM *a2j_props = NULL;
-	static const uint8_t a2j_props_size = 0;
-	//@}
 #endif // A2J_OPTS
 
 /** @name Default arduino2j functions*/
@@ -95,6 +90,7 @@ uint8_t a2jDebug(uint8_t *const lenp, uint8_t* *const datap){
 }
 #endif
 
+#ifdef A2J_PROPS
 /** Fetches the property strings from flash.
 The properties are stored in pairs as consecutive C-strings in flash.
 This method retrieves them and puts them sequentially in the memory starting at *datap. */
@@ -103,6 +99,7 @@ uint8_t a2jGetProperties(uint8_t *const lenp, uint8_t* *const datap){
 	*lenp = a2j_props_size;
 	return 0;
 }
+#endif // A2J_PROPS
 
 /** Echoes back the data array sent over the stream. */
 uint8_t a2jEcho(uint8_t *const lenp, uint8_t* *const datap){

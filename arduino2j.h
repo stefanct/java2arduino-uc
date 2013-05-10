@@ -86,15 +86,8 @@ ADDPROPEXP(MACRO, MACRO)
 /** Finalizes the properties. */
 #define ENDPROPS }; const uint8_t a2j_props_size = sizeof(a2j_props) - 1; /* C puts an additional \0 at the end of a "string" */
 
-#else // A2J_PROPS
-
-#define STARTPROPS const unsigned char* PROGMEM a2j_props = NULL;\
-const uint8_t a2j_props_size = 0;
-#define ADDPROP(key,value)
-#define ENDPROPS
-#endif
-
 //@}
+#endif // A2J_PROPS
 
 #ifdef A2J_FMAP
 	/** Struct type that stores a function pointer together with a string to enable function name mapping. */
@@ -122,36 +115,62 @@ The expanded output of #FUNCMAP has to be in scope of #ADDJT and #ADDLJT respect
 	#define ENDJT }; const uint8_t a2j_jt_elems = sizeof(a2j_jt)/sizeof(jt_entry);
 
 	#ifdef A2J_DBG
-		/** start of the jumptable including entries for various (default) arduino2j functions.*/
-		#define STARTJT \
-		FUNCMAP(a2jGetMapping, a2jGetMapping) \
-		FUNCMAP(a2jMany, a2jMany) \
-		FUNCMAP(a2jGetProperties, a2jGetProperties) \
-		FUNCMAP(a2jDebug, a2jDebug) \
-		FUNCMAP(a2jEcho, a2jEcho) \
-		FUNCMAP(a2jEchoMany, a2jEchoMany) \
-		const jt_entry PROGMEM a2j_jt[] = { \
-		{&a2jGetMapping, a2jGetMapping_map} \
-		ADDJT(a2jMany) \
-		ADDJT(a2jGetProperties) \
-		ADDJT(a2jDebug) \
-		ADDJT(a2jEcho)\
-		ADDLJT(a2jEchoMany)
-		
+		#ifdef A2J_PROPS
+			/** start of the jumptable including entries for various (default) arduino2j functions.*/
+			#define STARTJT \
+			FUNCMAP(a2jGetMapping, a2jGetMapping) \
+			FUNCMAP(a2jMany, a2jMany) \
+			FUNCMAP(a2jGetProperties, a2jGetProperties) \
+			FUNCMAP(a2jDebug, a2jDebug) \
+			FUNCMAP(a2jEcho, a2jEcho) \
+			FUNCMAP(a2jEchoMany, a2jEchoMany) \
+			const jt_entry PROGMEM a2j_jt[] = { \
+			{&a2jGetMapping, a2jGetMapping_map} \
+			ADDJT(a2jMany) \
+			ADDJT(a2jGetProperties) \
+			ADDJT(a2jDebug) \
+			ADDJT(a2jEcho)\
+			ADDLJT(a2jEchoMany)
+		#else // A2J_PROPS
+			#define STARTJT \
+			FUNCMAP(a2jGetMapping, a2jGetMapping) \
+			FUNCMAP(a2jMany, a2jMany) \
+			FUNCMAP(a2jDebug, a2jDebug) \
+			FUNCMAP(a2jEcho, a2jEcho) \
+			FUNCMAP(a2jEchoMany, a2jEchoMany) \
+			const jt_entry PROGMEM a2j_jt[] = { \
+			{&a2jGetMapping, a2jGetMapping_map} \
+			ADDJT(a2jMany) \
+			ADDJT(a2jDebug) \
+			ADDJT(a2jEcho)\
+			ADDLJT(a2jEchoMany)
+		#endif // A2J_PROPS
 	#else // A2J_DBG
-
-		#define STARTJT \
-		FUNCMAP(a2jGetMapping, a2jGetMapping) \
-		FUNCMAP(a2jMany, a2jMany) \
-		FUNCMAP(a2jGetProperties, a2jGetProperties) \
-		FUNCMAP(a2jEcho, a2jEcho) \
-		FUNCMAP(a2jEchoMany, a2jEchoMany) \
-		const jt_entry PROGMEM a2j_jt[] = { \
-		{&a2jGetMapping, a2jGetMapping_map} \
-		ADDJT(a2jMany) \
-		ADDJT(a2jGetProperties) \
-		ADDJT(a2jEcho)\
-		ADDLJT(a2jEchoMany)
+		#ifdef A2J_PROPS
+			#define STARTJT \
+			FUNCMAP(a2jGetMapping, a2jGetMapping) \
+			FUNCMAP(a2jMany, a2jMany) \
+			FUNCMAP(a2jGetProperties, a2jGetProperties) \
+			FUNCMAP(a2jEcho, a2jEcho) \
+			FUNCMAP(a2jEchoMany, a2jEchoMany) \
+			const jt_entry PROGMEM a2j_jt[] = { \
+			{&a2jGetMapping, a2jGetMapping_map} \
+			ADDJT(a2jMany) \
+			ADDJT(a2jGetProperties) \
+			ADDJT(a2jEcho)\
+			ADDLJT(a2jEchoMany)
+		#else // A2J_PROPS
+			#define STARTJT \
+			FUNCMAP(a2jGetMapping, a2jGetMapping) \
+			FUNCMAP(a2jMany, a2jMany) \
+			FUNCMAP(a2jEcho, a2jEcho) \
+			FUNCMAP(a2jEchoMany, a2jEchoMany) \
+			const jt_entry PROGMEM a2j_jt[] = { \
+			{&a2jGetMapping, a2jGetMapping_map} \
+			ADDJT(a2jMany) \
+			ADDJT(a2jEcho)\
+			ADDLJT(a2jEchoMany)
+		#endif // A2J_PROPS
 	#endif // A2J_DBG
 //@}
 
@@ -165,18 +184,33 @@ The expanded output of #FUNCMAP has to be in scope of #ADDJT and #ADDLJT respect
 	#define ENDJT }; const uint8_t a2j_jt_elems = sizeof(a2j_jt)/sizeof(jt_entry);
 
 	#ifdef A2J_DBG
-		#define STARTJT const CMD_P PROGMEM a2j_jt[] = { \
-			&a2jMany \
-			ADDJT(a2jGetProperties) \
-			ADDJT(a2jDebug) \
-			ADDJT(a2jEcho) \
-			ADDLJT(a2jEchoMany)
+		#ifdef A2J_PROPS
+			#define STARTJT const CMD_P PROGMEM a2j_jt[] = { \
+				&a2jMany \
+				ADDJT(a2jGetProperties) \
+				ADDJT(a2jDebug) \
+				ADDJT(a2jEcho) \
+				ADDLJT(a2jEchoMany)
+		#else // A2J_PROPS
+			#define STARTJT const CMD_P PROGMEM a2j_jt[] = { \
+				&a2jMany \
+				ADDJT(a2jDebug) \
+				ADDJT(a2jEcho) \
+				ADDLJT(a2jEchoMany)
+		#endif // A2J_PROPS
 	#else // A2J_DBG
-		#define STARTJT const CMD_P PROGMEM a2j_jt[] = { \
-			&a2jMany \
-			ADDJT(a2jGetProperties) \
-			ADDJT(a2jEcho) \
-			ADDLJT(a2jEchoMany)
+		#ifdef A2J_PROPS
+			#define STARTJT const CMD_P PROGMEM a2j_jt[] = { \
+				&a2jMany \
+				ADDJT(a2jGetProperties) \
+				ADDJT(a2jEcho) \
+				ADDLJT(a2jEchoMany)
+		#else // A2J_PROPS
+			#define STARTJT const CMD_P PROGMEM a2j_jt[] = { \
+				&a2jMany \
+				ADDJT(a2jEcho) \
+				ADDLJT(a2jEchoMany)
+		#endif // A2J_PROPS
 	#endif // A2J_DBG
 #endif // A2J_FMAP
 #else // A2J
