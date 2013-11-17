@@ -12,8 +12,11 @@ For documentation of the code of the "other" side please see j2arduino and espec
 #ifdef A2J
 
 #include <stdint.h>
+#include <stdbool.h>
+#include <stdio.h>
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
+#include <util/atomic.h>
 #include "a2j_lowlevel.h"
 #include "arduino2j.h"
 
@@ -44,6 +47,33 @@ static void a2jSendErrorFrame(uint8_t ret, uint8_t seq, uint16_t line);
 	STARTJT
 	ENDJT
 #endif // A2J_OPTS
+
+uint16_t a2jReadEscapedByte(){
+	// we need either one unescaped byte...
+	uint16_t data;
+	if((data = a2jReadByte()) > 0xFF)
+		return data;
+	if(data == A2J_ESC){
+		// ... or an escape character + the escaped byte
+		if((data = a2jReadByte()) > 0xFF){
+			return data;
+		}
+		data += 1;
+	} else if (data == A2J_SOF || data == A2J_SOS)
+		return -A2J_RET_ESC; // Unescaped delimiter character inside frame
+
+	return data;
+}
+
+uint8_t a2jWriteEscapedByte(uint8_t data){
+	if(data == A2J_SOF || data == A2J_SOS || data == A2J_ESC){
+		uint8_t err = a2jWriteByte(A2J_ESC);
+		if(err)
+			return err;
+		return a2jWriteByte(data-1);
+	}else
+		return a2jWriteByte(data);
+}
 
 /** @name Default arduino2j functions*/
 //@{
@@ -100,6 +130,59 @@ uint8_t a2jGetProperties(uint8_t *const lenp, uint8_t* *const datap){
 	return 0;
 }
 #endif // A2J_PROPS
+
+static uint8_t a2jSend_int(uint8_t start_byte, uint8_t cmd, uint8_t seq, uint8_t len, uint8_t* const data){
+	uint16_t i = 1000;
+	while(!a2jReady()){
+		a2jTask();
+		if(--i == 0) {
+			return 10;
+		}
+	}
+
+	if(a2jWriteByte(start_byte)) {
+		return 11;
+	}
+
+	if(a2jWriteEscapedByte(seq)){ // sequence number
+		return 12;
+	}
+	if(a2jWriteEscapedByte(cmd)){ // client id
+		return 13;
+	}
+	if(a2jWriteEscapedByte(len)){ // length
+		return 14;
+	}
+	uint8_t csum = (uint8_t)(seq ^ (cmd + A2J_CRC_CMD) ^ (len + A2J_CRC_LEN));
+	for(i = 0; i < len; i++){
+		a2jWriteEscapedByte(data[i]);
+		csum ^= data[i];
+	}
+	if(a2jWriteEscapedByte(csum)){ // checksum
+		return 15;
+	}
+	a2jFlush();
+	return 0;
+}
+
+#ifdef A2J_SIF
+static bool sif_mutex = 0;
+
+/** Sends a server-initiated frame (i.e. without being polled by the client). */
+uint8_t a2jSendSif(uint8_t cmd, uint8_t len, uint8_t* const data){
+	ATOMIC_BLOCK(ATOMIC_FORCEON) {
+		if(sif_mutex == 1){
+			return -1;
+		}
+		sif_mutex = 1;
+	}
+	static uint8_t seq = 0;
+	uint8_t ret = a2jSend_int(A2J_SOS, cmd, seq, len, data);
+	seq++;
+	sif_mutex = 0;
+	return ret;
+}
+#endif // A2J_SIF
 
 /** Echoes back the data array sent over the stream. */
 uint8_t a2jEcho(uint8_t *const lenp, uint8_t* *const datap){
@@ -166,8 +249,19 @@ Afterwards the method sends the return value of the callee, the length of the re
 the reply data itself back and returns.
 In the case of an error a special packet (see \ref j2aerrors, #a2jSendErrorFrame) is sent if possible before returning.*/
 void a2jProcess(){
-	if(!a2jReady() || !a2jAvailable() || a2jReadByte() != A2J_SOF)
+	if(!a2jReady() || !a2jAvailable())
 		return;
+
+#ifdef A2J_SIF
+	ATOMIC_BLOCK(ATOMIC_FORCEON) {
+		if(sif_mutex == 1){
+			return;
+		}
+		sif_mutex = 1;
+	}
+#endif // A2J_SIF
+	if (a2jReadByte() != A2J_SOF)
+		goto out;
 
 	static uint8_t buf[256];
 	uint8_t* payload = buf;
@@ -176,7 +270,7 @@ void a2jProcess(){
 	uint16_t tmp = a2jReadEscapedByte();
 	if(tmp > 0xFF){
 		a2jSendErrorFrame(A2J_RET_TO, (uint8_t)tmp, __LINE__);
-		return;
+		goto out;
 	}
 	uint8_t seq = (uint8_t)tmp;
 
@@ -184,13 +278,13 @@ void a2jProcess(){
 	tmp = a2jReadEscapedByte();
 	if(tmp > 0xFF){
 		a2jSendErrorFrame(A2J_RET_TO, seq, __LINE__);
-		return;
+		goto out;
 	}
 
 	// limit offset to the size of the jumptable
 	if(tmp >= a2j_jt_elems){
 		a2jSendErrorFrame(A2J_RET_OOB, seq, __LINE__);
-		return;
+		goto out;
 	}
 	uint8_t off = (uint8_t)tmp;
 	
@@ -198,7 +292,7 @@ void a2jProcess(){
 	tmp = a2jReadEscapedByte();
 	if(tmp > 0xFF){
 		a2jSendErrorFrame(A2J_RET_TO, seq, __LINE__);
-		return;
+		goto out;
 	}
 	uint8_t len = (uint8_t)tmp;
 
@@ -208,7 +302,7 @@ void a2jProcess(){
 		tmp = a2jReadEscapedByte();
 		if(tmp > 0xFF){
 			a2jSendErrorFrame(A2J_RET_TO, seq, __LINE__);
-			return;
+			goto out;
 		}
 		payload[i] = (uint8_t)tmp;
 		csum ^= (uint8_t)tmp;
@@ -218,13 +312,13 @@ void a2jProcess(){
 	tmp = a2jReadEscapedByte();
 	if(tmp > 0xFF){
 		a2jSendErrorFrame(A2J_RET_TO, seq, __LINE__);
-		return;
+		goto out;
 	}
 
 	uint8_t rsum = (uint8_t)tmp;
 	if(csum != rsum){
 		a2jSendErrorFrame(A2J_RET_CHKSUM, seq, __LINE__);
-		return;
+		goto out;
 	}
 	
 	uint8_t *const lenp = &len; // const pointer to len
@@ -240,42 +334,27 @@ void a2jProcess(){
 	uint8_t ret = (*cmd)(lenp, bufp);
 	if(ret == A2J_RET_OOB && cmd == &a2jMany){
 		a2jSendErrorFrame(A2J_RET_OOB, seq, __LINE__);
-		return;
+		goto out;
 	}
-	
-	// sending reply frame
-	if(a2jWriteByte(A2J_SOF))
-		return;
-	if(a2jWriteEscapedByte(seq)) // sequence number
-		return;
-	if(a2jWriteEscapedByte(ret)) // return value
-		return;
-	if(a2jWriteEscapedByte(len)) // length
-		return;
 
-	// start new calculation of frame checksum
-	csum = (uint8_t)(seq ^ (A2J_CRC_CMD + ret) ^ (A2J_CRC_LEN + len));
+	if (a2jSend_int(A2J_SOF, ret, seq, len, payload))
+		goto out;
 
-	// sending data array
-	for(uint16_t i=0; i<len; i++){
-		uint8_t tmp8 = payload[i];
-		if(a2jWriteEscapedByte(tmp8))
-			return;
-		csum ^= tmp8;
-	}
-	if(a2jWriteEscapedByte(csum))
-		return;
-	a2jFlush();
+out:
+#ifdef A2J_SIF
+	sif_mutex = 0;
+#endif // A2J_SIF
+	return;
 }
 
 /** Sends a frame indicating, that an error occurred.
 @see arduino2jerrors*/
-static void a2jSendErrorFrame(uint8_t ret, uint8_t seq, uint16_t line){
+static void a2jSendErrorFrame(uint8_t err, uint8_t seq, uint16_t line){
 	if(a2jWriteByte(A2J_SOF))
 		return;
 	if(a2jWriteEscapedByte(seq)) // sequence number
 		return;
-	if(a2jWriteEscapedByte(ret)) // return value
+	if(a2jWriteEscapedByte(err)) // return value
 		return;
 	uint8_t len = 2;
 	if(a2jWriteEscapedByte(len)) // length
@@ -286,8 +365,9 @@ static void a2jSendErrorFrame(uint8_t ret, uint8_t seq, uint16_t line){
 	uint8_t linel = line & 0xFF;
 	if(a2jWriteEscapedByte(linel)) // line
 		return;
-	if(a2jWriteEscapedByte((uint8_t)(seq ^ (A2J_CRC_CMD + ret) ^ (A2J_CRC_LEN+len) ^ lineu ^ linel))) // checksum
+	if(a2jWriteEscapedByte((uint8_t)(seq ^ (A2J_CRC_CMD + err) ^ (A2J_CRC_LEN+len) ^ lineu ^ linel))) // checksum
 		return;
 	a2jFlush();
 }
+
 #endif // A2J

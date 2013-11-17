@@ -42,15 +42,16 @@ uint16_t a2jReadByte(){
 		}
 		_delay_ms(1);
 	}
-	return -1;
+	return -A2J_RET_TO;
 }
 
 uint8_t a2jWriteByte(uint8_t data){
 	Endpoint_SelectEndpoint(A2J_USB_IN_ADDR);
 	if(!(Endpoint_IsReadWriteAllowed())){
 		Endpoint_ClearIN();
-		if(Endpoint_WaitUntilReady() != ENDPOINT_READYWAIT_NoError){
-			return -1;
+		uint8_t ret = Endpoint_WaitUntilReady();
+		if(ret != ENDPOINT_READYWAIT_NoError){
+			return ret;
 		}
 	}
 

@@ -38,7 +38,7 @@ uint16_t a2jReadByte(){
 		}
 		_delay_ms(1);
 	}
-	return -1;
+	return -A2J_RET_TO;
 }
 
 uint8_t a2jWriteByte(uint8_t data){

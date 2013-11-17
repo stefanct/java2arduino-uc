@@ -37,6 +37,10 @@ Has to be called in a timely manner depending on the underlying protocol:
 - Serial: not at all (equals nop)*/
 void a2jTask(void);
 
+#ifdef A2J_SIF
+uint8_t a2jSendSif(uint8_t cmd, uint8_t len, uint8_t* const data);
+#endif // A2J_SIF
+
 /**	@name default functions */
 //@{
 #ifdef A2J_FMAP

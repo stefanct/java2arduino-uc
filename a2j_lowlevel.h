@@ -15,23 +15,6 @@ Arduino2java generic lowlevel abstraction interface.*/
 		#error "no a2j low level implementation selected. please define A2J_SERIAL or A2J_USB"
 	#endif
 
-/** Timeout for reads from the stream (in milliseconds). */
-#define A2J_TIMEOUT 10
-
-/** @addtogroup j2aframing java2arduino framing characters
-\see \ref framing */
-//@{
-#define A2J_SOF 0x12 /**< Start of frame.*/
-#define A2J_ESC 0x7D /**< Escape character.*/
-//@}
-
-/** @addtogroup j2acrc java2arduino crc constants
-\see \ref crc */
-//@{
-#define A2J_CRC_CMD 11 /**< Constant to be added to the command offset byte. */
-#define A2J_CRC_LEN 97 /**< Constant to be added to the length byte. */
-//@}
-
 /** Indicates wheter the underlying stream layer is connected and ready.
 
 @return 0 if not ready */
