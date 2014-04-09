@@ -190,14 +190,16 @@ The expanded output of #FUNCMAP has to be in scope of #ADDJT and #ADDLJT respect
 	#ifdef A2J_DBG
 		#ifdef A2J_PROPS
 			#define STARTJT const CMD_P PROGMEM a2j_jt[] = { \
-				&a2jMany \
+				&a2jEcho \
+				ADDJT(a2jMany) \
 				ADDJT(a2jGetProperties) \
 				ADDJT(a2jDebug) \
 				ADDJT(a2jEcho) \
 				ADDLJT(a2jEchoMany)
 		#else // A2J_PROPS
 			#define STARTJT const CMD_P PROGMEM a2j_jt[] = { \
-				&a2jMany \
+				&a2jEcho \
+				ADDJT(a2jMany) \
 				ADDJT(a2jDebug) \
 				ADDJT(a2jEcho) \
 				ADDLJT(a2jEchoMany)
@@ -205,13 +207,15 @@ The expanded output of #FUNCMAP has to be in scope of #ADDJT and #ADDLJT respect
 	#else // A2J_DBG
 		#ifdef A2J_PROPS
 			#define STARTJT const CMD_P PROGMEM a2j_jt[] = { \
-				&a2jMany \
+				&a2jEcho \
+				ADDJT(a2jMany) \
 				ADDJT(a2jGetProperties) \
 				ADDJT(a2jEcho) \
 				ADDLJT(a2jEchoMany)
 		#else // A2J_PROPS
 			#define STARTJT const CMD_P PROGMEM a2j_jt[] = { \
-				&a2jMany \
+				&a2jEcho \
+				ADDJT(a2jMany) \
 				ADDJT(a2jEcho) \
 				ADDLJT(a2jEchoMany)
 		#endif // A2J_PROPS

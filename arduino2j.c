@@ -280,13 +280,20 @@ void a2jProcess(){
 		a2jSendErrorFrame(A2J_RET_TO, seq, __LINE__);
 		goto out;
 	}
+	uint8_t off = (uint8_t)tmp;
 
 	// limit offset to the size of the jumptable
-	if(tmp >= a2j_jt_elems){
+	if(off >= a2j_jt_elems){
 		a2jSendErrorFrame(A2J_RET_OOB, seq, __LINE__);
 		goto out;
+	} else {
+		#ifndef A2J_FMAP
+			if (off == 0) {
+				a2jSendErrorFrame(A2J_RET_OOB, seq, __LINE__);
+				goto out;
+			}
+		#endif
 	}
-	uint8_t off = (uint8_t)tmp;
 	
 	// length of the data array
 	tmp = a2jReadEscapedByte();
