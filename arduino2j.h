@@ -69,13 +69,13 @@ uint8_t a2jEchoMany(uint8_t* isLastp, uint32_t *const offset, uint8_t *const len
 #ifdef A2J
 #ifdef A2J_PROPS
 /** @name arduino2j properties macros
-Arduino2j properties are a mapping between strings readable by the host computer.
+Arduino2j properties are a mapping between string pairs readable by the host computer.
 E.g. this can be used to propagate the presence or property of devices attached to the Arduino.
 Arduino2j properties are saved to flash as sequence of c-string pairs (key and corresponding value).
 To create the mapping one has to call the needed macros in succession.*/
 //@{
 /** Header for the properties. Needs to be called first.*/
-#define STARTPROPS unsigned char const PROGMEM a2j_props[] = {
+#define STARTPROPS char const PROGMEM a2j_props[] = {
 /** Adds a mapping from \a key to \a value. */
 #define ADDPROP(key,value)  #key "\0"  #value "\0"
 #define STRFY(x) #x
@@ -115,12 +115,12 @@ The expanded output of #FUNCMAP has to be in scope of #ADDJT and #ADDLJT respect
 	#define ADDJT(funcName) , {&funcName, funcName##_map}
 	/** Appends an entry to the jumptable, to be used for a2jMany functions. @see CMD_P_MANY */
 	#define ADDLJT(funcName) , {(CMD_P)&funcName, funcName##_map}
-	/** finalizes the jumptable/function mapping */
+	/** Finalizes the jumptable/function mapping */
 	#define ENDJT }; const uint8_t a2j_jt_elems = sizeof(a2j_jt)/sizeof(jt_entry);
 
 	#ifdef A2J_DBG
 		#ifdef A2J_PROPS
-			/** start of the jumptable including entries for various (default) arduino2j functions.*/
+			/** Start of the jumptable including entries for various (default) arduino2j functions.*/
 			#define STARTJT \
 			FUNCMAP(a2jGetMapping, a2jGetMapping) \
 			FUNCMAP(a2jMany, a2jMany) \

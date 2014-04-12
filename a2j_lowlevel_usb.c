@@ -51,7 +51,7 @@ uint8_t a2jWriteByte(uint8_t data){
 		Endpoint_ClearIN();
 		uint8_t ret = Endpoint_WaitUntilReady();
 		if(ret != ENDPOINT_READYWAIT_NoError){
-			return ret;
+			return -1;
 		}
 	}
 

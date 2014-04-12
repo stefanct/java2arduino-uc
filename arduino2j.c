@@ -33,8 +33,8 @@ static void a2jSendErrorFrame(uint8_t ret, uint8_t seq, uint16_t line);
 #ifdef A2J_PROPS
 	/** @name External properties */
 	//@{
-	extern unsigned char* const PROGMEM a2j_props[];
 	extern const uint8_t a2j_props_size;
+	extern char const PROGMEM a2j_props[];
 	//@}
 #endif // A2J_PROPS
 
