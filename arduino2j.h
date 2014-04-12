@@ -5,6 +5,7 @@ Arduino2j header.*/
 #define A2J_H
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <avr/pgmspace.h>
 #include "j2a_const.h"
@@ -24,7 +25,7 @@ which is filled with the payload of the host computer.
 \a isLastp indicates if this is the last chunk.
 Upto #A2J_MANY_PAYLOAD bytes following \a *datap may be written by the callee.
 After return the returned \a uint8_t, the offset, \a *isLastp and \a *lenp bytes of the array at \a *datap will be sent back to the host.*/
-typedef uint8_t (*const CMD_P_MANY)(uint8_t* isLastp, uint32_t *const offsetp, uint8_t *const lenp, uint8_t* *const datap);
+typedef uint8_t (*const CMD_P_MANY)(bool* isLastp, bool isWrite, uint32_t *const offsetp, uint8_t *const lenp, uint8_t* *const datap);
 
 void a2jProcess(void);
 
@@ -52,9 +53,9 @@ uint8_t a2jDebug(uint8_t *const lenp, uint8_t* *const datap);
 #endif
 
 uint8_t a2jMany(uint8_t *const lenp, uint8_t* *const datap);
-uint8_t a2jGetProperties(uint8_t *const lenp, uint8_t* *const datap);
+uint8_t a2jGetProperties(bool* isLastp, bool isWrite, uint32_t *const offset, uint8_t *const lenp, uint8_t* *const datap);
 uint8_t a2jEcho(uint8_t *const,  uint8_t * *const);
-uint8_t a2jEchoMany(uint8_t* isLastp, uint32_t *const offset, uint8_t *const lenp, uint8_t* *const datap);
+uint8_t a2jEchoMany(bool* isLastp, bool isWrite, uint32_t *const offset, uint8_t *const lenp, uint8_t* *const datap);
 //@}
 
 /**\name Native endianess to byte array macros
@@ -88,7 +89,7 @@ ADDPROPEXP(MACRO, MACRO)
 \endcode will create the mapping "MACRO"->"13".*/
 #define ADDPROPEXP(key,value) #key "\0" STRFY(value) "\0"
 /** Finalizes the properties. */
-#define ENDPROPS }; const uint8_t a2j_props_size = sizeof(a2j_props) - 1; /* C puts an additional \0 at the end of a "string" */
+#define ENDPROPS }; const uint32_t a2j_props_size = sizeof(a2j_props) - 1; /* C puts an additional \0 at the end of a "string" */
 
 //@}
 #endif // A2J_PROPS
@@ -131,7 +132,7 @@ The expanded output of #FUNCMAP has to be in scope of #ADDJT and #ADDLJT respect
 			const jt_entry PROGMEM a2j_jt[] = { \
 			{&a2jGetMapping, a2jGetMapping_map} \
 			ADDJT(a2jMany) \
-			ADDJT(a2jGetProperties) \
+			ADDLJT(a2jGetProperties) \
 			ADDJT(a2jDebug) \
 			ADDJT(a2jEcho)\
 			ADDLJT(a2jEchoMany)
@@ -160,7 +161,7 @@ The expanded output of #FUNCMAP has to be in scope of #ADDJT and #ADDLJT respect
 			const jt_entry PROGMEM a2j_jt[] = { \
 			{&a2jGetMapping, a2jGetMapping_map} \
 			ADDJT(a2jMany) \
-			ADDJT(a2jGetProperties) \
+			ADDLJT(a2jGetProperties) \
 			ADDJT(a2jEcho)\
 			ADDLJT(a2jEchoMany)
 		#else // A2J_PROPS
@@ -192,7 +193,7 @@ The expanded output of #FUNCMAP has to be in scope of #ADDJT and #ADDLJT respect
 			#define STARTJT const CMD_P PROGMEM a2j_jt[] = { \
 				&a2jEcho \
 				ADDJT(a2jMany) \
-				ADDJT(a2jGetProperties) \
+				ADDLJT(a2jGetProperties) \
 				ADDJT(a2jDebug) \
 				ADDJT(a2jEcho) \
 				ADDLJT(a2jEchoMany)
@@ -209,7 +210,7 @@ The expanded output of #FUNCMAP has to be in scope of #ADDJT and #ADDLJT respect
 			#define STARTJT const CMD_P PROGMEM a2j_jt[] = { \
 				&a2jEcho \
 				ADDJT(a2jMany) \
-				ADDJT(a2jGetProperties) \
+				ADDLJT(a2jGetProperties) \
 				ADDJT(a2jEcho) \
 				ADDLJT(a2jEchoMany)
 		#else // A2J_PROPS

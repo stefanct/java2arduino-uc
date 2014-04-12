@@ -20,6 +20,13 @@ For documentation of the code of the "other" side please see j2arduino and espec
 #include "a2j_lowlevel.h"
 #include "arduino2j.h"
 
+#ifndef min
+#define min(x,y) ((x) < (y) ? (x) : (y))
+#endif
+#ifndef max
+#define max(x,y) ((x) > (y) ? (x) : (y))
+#endif
+
 static void a2jSendErrorFrame(uint8_t ret, uint8_t seq, uint16_t line);
 
 #ifdef A2J_OPTS
@@ -33,8 +40,8 @@ static void a2jSendErrorFrame(uint8_t ret, uint8_t seq, uint16_t line);
 #ifdef A2J_PROPS
 	/** @name External properties */
 	//@{
-	extern const uint8_t a2j_props_size;
 	extern char const PROGMEM a2j_props[];
+	extern const uint32_t a2j_props_size;
 	//@}
 #endif // A2J_PROPS
 
@@ -123,10 +130,16 @@ uint8_t a2jDebug(uint8_t *const lenp, uint8_t* *const datap){
 #ifdef A2J_PROPS
 /** Fetches the property strings from flash.
 The properties are stored in pairs as consecutive C-strings in flash.
-This method retrieves them and puts them sequentially in the memory starting at *datap. */
-uint8_t a2jGetProperties(uint8_t *const lenp, uint8_t* *const datap){
-	memcpy_P(*datap, a2j_props, a2j_props_size);
-	*lenp = a2j_props_size;
+This method retrieves them using a2jMany in the most obvious way,
+namely by sliding the a2jMany window over the string as requested.
+Writes are currently not possible. */
+uint8_t a2jGetProperties(bool* isLastp, bool isWrite, uint32_t *const offset, uint8_t *const lenp, uint8_t* *const datap){
+	if (isWrite || (*offset >= a2j_props_size))
+		return -1;
+	*lenp = min(a2j_props_size - *offset, A2J_MANY_PAYLOAD);
+	memcpy_P(*datap, a2j_props + *offset, *lenp);
+	*isLastp = (*offset + *lenp) == a2j_props_size;
+
 	return 0;
 }
 #endif // A2J_PROPS
@@ -193,7 +206,7 @@ uint8_t a2jEcho(uint8_t *const lenp, uint8_t* *const datap){
 
 /**@ingroup j2amany
 Echoes back the data sent over the stream. */
-uint8_t a2jEchoMany(uint8_t* isLastp, uint32_t *const offset, uint8_t *const lenp, uint8_t* *const datap){
+uint8_t a2jEchoMany(bool* isLastp, bool isWrite, uint32_t *const offset, uint8_t *const lenp, uint8_t* *const datap){
 	(void)isLastp;
 	(void)offset;
 	(void)lenp;
@@ -233,8 +246,12 @@ uint8_t a2jMany(uint8_t *const lenp, uint8_t* *const datap){
 	CMD_P_MANY cmd = (CMD_P_MANY)pgm_read_word(&a2j_jt[func]);
 	#endif
 
-	(*datap)[0] = (*cmd)(*datap+1, &offset, &len, &ndatap);
+	uint8_t flags = (*datap)[1];
+	bool isLast = flags & A2J_MANY_ISLAST_MASK;
+	bool isWrite = flags & A2J_MANY_ISWRITE_MASK;
+	(*datap)[0] = (*cmd)(&isLast, isWrite, &offset, &len, &ndatap);
 	*lenp = len + A2J_MANY_HEADER;
+	(*datap)[1] = isLast << A2J_MANY_ISLAST_BIT;
 	return 0;
 }
 //@}
