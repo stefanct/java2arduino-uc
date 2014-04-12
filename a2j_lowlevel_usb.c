@@ -180,18 +180,18 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 		.Header					= {.Size = sizeof(USB_Descriptor_Endpoint_t), .Type = DTYPE_Endpoint},
 
 		.EndpointAddress		= A2J_USB_IN_ADDR,
-		.Attributes				= (EP_TYPE_BULK | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA),
+		.Attributes				= (EP_TYPE_INTERRUPT | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA),
 		.EndpointSize			= A2J_USB_IN_EPSIZE,
-		.PollingIntervalMS		= 0x00
+		.PollingIntervalMS		= 1
 	},
 
 	.A2J_DataOutEndpoint = {
 		.Header					= {.Size = sizeof(USB_Descriptor_Endpoint_t), .Type = DTYPE_Endpoint},
 
 		.EndpointAddress		= A2J_USB_OUT_ADDR,
-		.Attributes				= (EP_TYPE_BULK | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA),
+		.Attributes				= (EP_TYPE_INTERRUPT | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA),
 		.EndpointSize			= A2J_USB_OUT_EPSIZE,
-		.PollingIntervalMS		= 0x00
+		.PollingIntervalMS		= 1
 	},
 
 	A2J_USB_DESC_DEF
