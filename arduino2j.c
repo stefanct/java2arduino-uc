@@ -145,10 +145,10 @@ uint8_t a2jGetProperties(bool* isLastp, bool isWrite, uint32_t *const offset, ui
 #endif // A2J_PROPS
 
 static uint8_t a2jSend_int(uint8_t start_byte, uint8_t cmd, uint8_t seq, uint8_t len, uint8_t* const data){
-	uint16_t i = 1000;
+	uint16_t i = 1;
 	while(!a2jReady()){
 		a2jTask();
-		if(--i == 0) {
+		if(i-- == 0) {
 			return 10;
 		}
 	}
@@ -168,8 +168,9 @@ static uint8_t a2jSend_int(uint8_t start_byte, uint8_t cmd, uint8_t seq, uint8_t
 	}
 	uint8_t csum = (uint8_t)(seq ^ (cmd + A2J_CRC_CMD) ^ (len + A2J_CRC_LEN));
 	for(i = 0; i < len; i++){
-		a2jWriteEscapedByte(data[i]);
-		csum ^= data[i];
+		uint8_t tmp =  data[i];
+		a2jWriteEscapedByte(tmp);
+		csum ^= tmp;
 	}
 	if(a2jWriteEscapedByte(csum)){ // checksum
 		return 15;
@@ -179,7 +180,7 @@ static uint8_t a2jSend_int(uint8_t start_byte, uint8_t cmd, uint8_t seq, uint8_t
 }
 
 #ifdef A2J_SIF
-static bool sif_mutex = 0;
+static volatile bool sif_mutex = 0;
 
 /** Sends a server-initiated frame (i.e. without being polled by the client). */
 uint8_t a2jSendSif(uint8_t cmd, uint8_t len, uint8_t* const data){
