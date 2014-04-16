@@ -53,6 +53,7 @@ uint8_t a2jDebug(uint8_t *const lenp, uint8_t* *const datap);
 #endif
 
 uint8_t a2jMany(uint8_t *const lenp, uint8_t* *const datap);
+uint8_t a2jManyReadFlash(bool* isLastp, bool isWrite, uint32_t *const offset, uint8_t *const lenp, uint8_t* *const datap, PGM_VOID_P src, uint32_t size);
 uint8_t a2jGetProperties(bool* isLastp, bool isWrite, uint32_t *const offset, uint8_t *const lenp, uint8_t* *const datap);
 uint8_t a2jEcho(uint8_t *const,  uint8_t * *const);
 uint8_t a2jEchoMany(bool* isLastp, bool isWrite, uint32_t *const offset, uint8_t *const lenp, uint8_t* *const datap);

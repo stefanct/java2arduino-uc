@@ -127,6 +127,15 @@ uint8_t a2jDebug(uint8_t *const lenp, uint8_t* *const datap){
 }
 #endif
 
+uint8_t a2jManyReadFlash(bool* isLastp, bool isWrite, uint32_t *const offset, uint8_t *const lenp, uint8_t* *const datap, PGM_VOID_P src, uint32_t size){
+	if (isWrite || (*offset >= size))
+		return -1;
+	*lenp = min(size - *offset, A2J_MANY_PAYLOAD);
+	memcpy_P(*datap, ((const uint8_t *)src) + *offset, *lenp);
+	*isLastp = (*offset + *lenp) == size;
+	return 0;
+}
+
 #ifdef A2J_PROPS
 /** Fetches the property strings from flash.
 The properties are stored in pairs as consecutive C-strings in flash.
@@ -134,13 +143,7 @@ This method retrieves them using a2jMany in the most obvious way,
 namely by sliding the a2jMany window over the string as requested.
 Writes are currently not possible. */
 uint8_t a2jGetProperties(bool* isLastp, bool isWrite, uint32_t *const offset, uint8_t *const lenp, uint8_t* *const datap){
-	if (isWrite || (*offset >= a2j_props_size))
-		return -1;
-	*lenp = min(a2j_props_size - *offset, A2J_MANY_PAYLOAD);
-	memcpy_P(*datap, a2j_props + *offset, *lenp);
-	*isLastp = (*offset + *lenp) == a2j_props_size;
-
-	return 0;
+	return a2jManyReadFlash(isLastp, isWrite, offset, lenp, datap, a2j_props, a2j_props_size);
 }
 #endif // A2J_PROPS
 
